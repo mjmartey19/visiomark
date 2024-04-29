@@ -1,0 +1,8 @@
+models
+venv
+cifar.ipynb
+__pycache__/
+output_csv
+.vscode
+dataset/
+visiomark/
