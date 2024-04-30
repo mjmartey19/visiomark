@@ -1,0 +1,15 @@
+# Ignore artifacts:
+build
+coverage
+yarn.lock
+package-lock.json
+node_modules
+dist
+*.egg-info
+*.pyc
+*.pyo
+*.pyd
+*.swp
+
+*.json
+public
