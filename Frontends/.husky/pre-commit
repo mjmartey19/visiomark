@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+npm run ts-check
+npx prettier -w .
+git add .

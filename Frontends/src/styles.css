@@ -1,0 +1,26 @@
+@font-face {
+  font-family: Poppins;
+  src: url(/fonts/Poppins/Poppins-Regular.ttf);
+}
+
+@font-face {
+  font-family: Rubik;
+  src: url(/fonts/Rubik_Puddles/RubikPuddles-Regular.ttf);
+}
+
+:root {
+  font-family: Poppins, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  margin: auto;
+
+  color: #fff;
+  background-color: #121212;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
