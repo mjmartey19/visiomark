@@ -17,7 +17,7 @@ export const Dashboardcontainer = styled.div`
   flex-direction: column;
   gap-bottom: 1rem;
   height: 100vh;
-  // overflow: hidden;
+  overflow: hidden;
 `;
 
 

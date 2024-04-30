@@ -18,22 +18,28 @@ const entries = await readDir('visioMark', {
 
 const recentEntry = [
   {
-    name: 'COE 354_050',
+    name: 'COE 354_050.csv',
     entry: '',
     academic_year: '2023/2024',
-    Marked_time: '2 minutes ago'
+    marked_time: '2 minutes ago'
   },
   {
     name: 'COE 324_050.csv',
     entry: '',
     academic_year: '2023/2024',
-    Marked_time: '1 days ago'
+    marked_time: '1 days ago'
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: '',
+    academic_year: '2023/2024',
+    marked_time: '1 days ago'
   },
   {
     name: 'ME 304_156.csv',
     entry: '',
     academic_year: '2023/2024',
-    Marked_time: '2 days ago'
+    marked_time: '2 days ago'
   },
 ]
 const Dashboard = () => {
@@ -210,7 +216,6 @@ const Dashboard = () => {
               <ScrollArea
                 style={{
                   height: '27vh',
-                  background: 'red',
                   padding: '10px 15px 10px 0',
                 }}
               >
@@ -219,6 +224,8 @@ const Dashboard = () => {
                     <SharedCard
                       key={index}
                       name_of_file={entry.name}
+                      academic_year={entry.academic_year}
+                      marked_time={entry.marked_time}
                       entry={entry}
                     />
                   ))}

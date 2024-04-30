@@ -11,13 +11,19 @@ import { Constants } from '../../../../utils/constants';
 import { readCSVFile } from '../../../../utils/helper';
 import { useContext } from 'react';
 import { appContext } from '../../../../utils/Context';
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const SharedCard = ({
   name_of_file,
+  academic_year,
+  marked_time,
   entry,
 }: {
   name_of_file: string | undefined;
+  academic_year: string | undefined;
+  marked_time: string | undefined;
   entry: FileEntry;
+  
 }) => {
   const navigate = useNavigate();
   const openFile = async (path: string) => {
@@ -39,14 +45,14 @@ const SharedCard = ({
           background: THEME.colors.background.primary,
           color: '#fff',
           display: 'flex',
-          flexBasis: '20rem',
           justifyContent: 'space-between',
-          alignItems: 'center',
           padding: '2rem 1rem',
+          width: '13rem',
         }}
       >
-          <div>
-            <div style={{
+        <div>
+          <div
+            style={{
               padding: '0.6rem',
               width: 'fit-content',
               display: 'flex',
@@ -54,22 +60,49 @@ const SharedCard = ({
               alignContent: 'center',
               borderRadius: '0.2rem',
               background: THEME.colors.background.jet,
-            }}>
-                <FiFileText size={20}/>
-            </div>
+            }}
+          >
+            <FiFileText size={20} />
+          </div>
+          <div style={{
+            paddingTop: '1rem'
+          }}>
           <Text
-          size="lg"
-          color="#fff"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}
-        >
-          
-          {name_of_file}
-        </Text>
-        {/* <IconStyles>
+            size="md"
+            color="#fff"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}
+          >
+            {name_of_file}
+          </Text>
+          <Text
+            size="sm"
+            color="#fff"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}
+          >
+            {academic_year}
+          </Text>
+          <Text
+            size="xs"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color:`${THEME.colors.text.primary}`,
+              gap: '1rem',
+            }}
+          >
+            {marked_time}
+          </Text>
+          </div>
+
+          {/* <IconStyles>
           <Tooltip label="Preview file" position="left">
             <IconContainer>
               <VscPreview
@@ -104,8 +137,12 @@ const SharedCard = ({
             </IconContainer>
           </Tooltip>
         </IconStyles> */}
-          </div>
-          <div></div>
+        </div>
+        <div style={{
+          cursor: 'pointer',
+        }}>
+            <BsThreeDotsVertical color='#fff'/>
+        </div>
       </Card>
     </div>
   );
