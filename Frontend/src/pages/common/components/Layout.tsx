@@ -13,6 +13,7 @@ import {
 import { Constants } from '../../../utils/constants';
 import { BiHome } from 'react-icons/bi';
 import { CgFileDocument } from 'react-icons/cg';
+import { FiLogOut } from "react-icons/fi";
 import { FcStatistics } from 'react-icons/fc';
 import { FiSettings } from 'react-icons/fi';
 import { Avatar, Tabs } from '@mantine/core';
@@ -86,8 +87,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </TopbarContainer>
       
       <MainContainer>
-          <SidebarContainer>      
+          <SidebarContainer>  
             <Navigation>
+             <UserDetails>
+                <Avatar
+                  radius="xl"
+
+                  styles={{
+                    placeholder: {
+                      color: '#fff',
+                      backgroundColor: `${THEME.colors.background.jet}`,
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                >
+                  EA
+                </Avatar>
+                <p style={{ fontSize: '0.8rem'}}>Emmanuel Akowuah</p>
+              </UserDetails>    
               <NavLinks to={`${Constants.PATHS.home}`} aria-label="link to home">
                 <BiHome size={20} />
                 Home
@@ -128,6 +145,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 Settings
               </NavLinks>
             </Navigation>
+            <NavLinks to={`${Constants.PATHS.settings}`}
+             aria-label="settings of the user"
+            >
+
+              <FiLogOut size={20}  />
+              Logout
+            </NavLinks>
           </SidebarContainer>
 
           <ContentContainer>
@@ -147,18 +171,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   </StyledTabs>
                 ) : null}
               </div>
-              {/* <UserDetails>
-                <Avatar
-                  styles={{
-                    placeholder: {
-                      color: `${THEME.colors.button.midnight_green}`,
-                    },
-                  }}
-                >
-                  JD
-                </Avatar>
-                <p>John Doe</p>
-              </UserDetails> */}
+             
             {children}
           </ContentContainer>
       </MainContainer>

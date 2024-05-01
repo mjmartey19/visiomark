@@ -17,41 +17,46 @@ export const Dashboardcontainer = styled.div`
   flex-direction: column;
   gap-bottom: 1rem;
   height: 100vh;
+  overflow: hidden;
 `;
 
-export const MainContainer = styled.div`
-  display: flex;
-  padding-top:2.5rem;
-  gap-row: 2rem;
-  height: 100%
-
-`;
 
 export const TopbarContainer = styled.div`
   display: flex;
   padding: 0 2rem;
   justify-content: space-between;
   align-items: center;
+  background-color:  ${THEME.colors.background.black};
   border-bottom: 1px solid white
+`;
+
+export const MainContainer = styled.div`
+  display: flex;
+  gap-row: 2rem;
+  height: calc(100vh - 5rem);
 `;
 
 export const SidebarContainer = styled.div`
   padding: 0 0.1rem;
+  padding-top:2.5rem;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 1rem;
   width: 20rem;
-  height: 100%
+  padding-left: 3rem;
+ padding-bottom: 1rem;
+ background-color:  ${THEME.colors.background.black};
 `;
 
 
 
 export const ContentContainer = styled.div`
-  background-color:  ${THEME.colors.background.primary};
+  background-color:  ${THEME.colors.background.black};
   width: 100%;
   height: auto;
-  padding-left: 2rem;
-  padding-right: 2rem
+  padding: 2.5rem 2rem 0 2rem
+  
 `;
 
 export const LogoWrapper = styled.div`
@@ -89,9 +94,6 @@ export const NavLinks = styled(NavLink)`
 export const UserDetails = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  background-color: ${THEME.colors.background.jet};
+  
 `;

@@ -8,6 +8,7 @@ export const RequestBtn = styled.div`
   background: ${THEME.colors.background.jet};
   margin-top: 0.4rem;
   border-radius: 20px;
+  width: fit-content;
 `;
 
 export const RecentFiles = styled.div`
@@ -24,7 +25,7 @@ export const Title = styled.p`
 
 export const RFContent = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1.5rem;
   height: 100%;
 `;
