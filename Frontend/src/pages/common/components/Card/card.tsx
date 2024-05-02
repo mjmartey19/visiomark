@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Card, Text, Tooltip } from '@mantine/core';
 import { THEME } from '../../../../appTheme';
 import { FileEntry } from '@tauri-apps/api/fs';
@@ -11,7 +12,8 @@ import { Constants } from '../../../../utils/constants';
 import { readCSVFile } from '../../../../utils/helper';
 import { useContext } from 'react';
 import { appContext } from '../../../../utils/Context';
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { BsThreeDotsVertical } from 'react-icons/bs';
+import SharedCardMenu from './cardMenu';
 
 const SharedCard = ({
   name_of_file,
@@ -23,23 +25,17 @@ const SharedCard = ({
   academic_year: string | undefined;
   marked_time: string | undefined;
   entry: FileEntry;
-  
 }) => {
-  const navigate = useNavigate();
-  const openFile = async (path: string) => {
-    await open(path);
-  };
-  const { setResponseData } = useContext(appContext);
-
-  const runReadCSVFile = async () => {
-    const data = await readCSVFile({ name_of_file });
-    if (!data) return;
-    setResponseData(data);
-    navigate(`${Constants.PATHS.preview}`, { state: data });
-  };
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div>
+    <div
+      style={{
+        position: 'relative',
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Card
         sx={{
           background: THEME.colors.background.primary,
@@ -64,86 +60,56 @@ const SharedCard = ({
           >
             <FiFileText size={20} />
           </div>
-          <div style={{
-            paddingTop: '1rem'
-          }}>
-          <Text
-            size="md"
-            color="#fff"
+          <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
+              paddingTop: '1rem',
             }}
           >
-            {name_of_file}
-          </Text>
-          <Text
-            size="sm"
-            color="#fff"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-            }}
-          >
-            {academic_year}
-          </Text>
-          <Text
-            size="xs"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              color:`${THEME.colors.text.primary}`,
-              gap: '1rem',
-            }}
-          >
-            {marked_time}
-          </Text>
+            <Text
+              size="md"
+              color="#fff"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              {name_of_file}
+            </Text>
+            <Text
+              size="sm"
+              color="#fff"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              {academic_year}
+            </Text>
+            <Text
+              size="xs"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                color: `${THEME.colors.text.primary}`,
+                gap: '1rem',
+              }}
+            >
+              {marked_time}
+            </Text>
           </div>
-
-          {/* <IconStyles>
-          <Tooltip label="Preview file" position="left">
-            <IconContainer>
-              <VscPreview
-                size={20}
-                color={`${THEME.colors.button.primary}`}
-                style={{ cursor: 'pointer' }}
-                onClick={() => {
-                  runReadCSVFile();
-                }}
-              />
-            </IconContainer>
-          </Tooltip>
-          <Tooltip
-            label="Click to open file"
-            withArrow
-            position="left"
-            // offset={-70}
-            zIndex={500}
-          >
-            <IconContainer>
-              <BiLinkExternal
-                size={20}
-                color={`${THEME.colors.button.primary}`}
-                onClick={() => openFile(entry.path)}
-                style={{ cursor: 'pointer' }}
-              />
-            </IconContainer>
-          </Tooltip>
-          <Tooltip label="Click to delete file" position="left">
-            <IconContainer>
-              <BiTrash size={20} color="red" style={{ cursor: 'pointer' }} />
-            </IconContainer>
-          </Tooltip>
-        </IconStyles> */}
         </div>
-        <div style={{
-          cursor: 'pointer',
-        }}>
-            <BsThreeDotsVertical color='#fff'/>
+
+        <div
+          style={{
+            cursor: 'pointer',
+          }}
+        >
+          <BsThreeDotsVertical color="#fff" />
         </div>
       </Card>
+      {isHovered && <SharedCardMenu name_of_file={entry.name} entry={entry} />}
     </div>
   );
 };

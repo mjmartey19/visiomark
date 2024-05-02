@@ -7,41 +7,62 @@ import { useDisclosure } from '@mantine/hooks';
 import Modalforms from './ModalForms';
 import { readDir, BaseDirectory } from '@tauri-apps/api/fs';
 import { ScrollArea, Text } from '@mantine/core';
-
 import useDashboard from './hook/useDashboard';
+import { FileEntry } from '@tauri-apps/api/fs';
+import { Constants } from '../../utils/constants';
 
 const entries = await readDir('visioMark', {
   dir: BaseDirectory.Document,
   recursive: true,
 });
 
+// type RecentEntry = {
+//   name: string;
+//   entry: FileEntry; // Reference to another entry by index in the recentEntry array
+//   academic_year: string;
+//   marked_time: string;
+// };
 
-const recentEntry = [
-  {
-    name: 'COE 354_050.csv',
-    entry: '',
-    academic_year: '2023/2024',
-    marked_time: '2 minutes ago'
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: '',
-    academic_year: '2023/2024',
-    marked_time: '1 days ago'
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: '',
-    academic_year: '2023/2024',
-    marked_time: '1 days ago'
-  },
-  {
-    name: 'ME 304_156.csv',
-    entry: '',
-    academic_year: '2023/2024',
-    marked_time: '2 days ago'
-  },
-]
+// const recentEntry: RecentEntry[] = [
+//   {
+//     name: 'COE 354_050.csv',
+//     entry: {
+//       "path": "/path/to/file.txt",
+//       "name": "file.txt",
+//     },
+//     academic_year: '2023/2024',
+//     marked_time: '2 minutes ago'
+//   },
+//   {
+//     name: 'COE 324_050.csv',
+//     entry: {
+//       "path": "/path/to/file.txt",
+//       "name": "file.txt",
+//     },
+//     academic_year: '2023/2024',
+//     marked_time: '1 day ago'
+//   },
+//   {
+//     name: 'COE 324_050.csv',
+//     entry: {
+//       "path": "/path/to/file.txt",
+//       "name": "file.txt",
+//     },
+//     academic_year: '2023/2024',
+//     marked_time: '1 day ago'
+//   },
+//   {
+//     name: 'ME 304_156.csv',
+//     entry: {
+//       "path": "/path/to/file.txt",
+//       "name": "file.txt",
+//     },
+//     academic_year: '2023/2024',
+//     marked_time: '2 days ago'
+//   },
+// ];
+
+
 const Dashboard = () => {
   const { getFilenamesFromLocalStorage } = useDashboard();
   const [opened, { open, close }] = useDisclosure(false);
@@ -83,7 +104,7 @@ const Dashboard = () => {
           Home
         </Text>
         <Text
-          c="#CCCCCC"
+          c={THEME.colors.text.primary}
           sx={{ fontFamily: 'Greycliff CF, sans-serif' }}
           ta="left"
           fz="1rem"
@@ -126,7 +147,7 @@ const Dashboard = () => {
               </Text>
 
               <Text
-                c="#CCCCCC"
+                c={THEME.colors.text.primary}
                 sx={{ fontFamily: 'poppins, sans-serif' }}
                 ta="left"
                 fz="0.9rem"
@@ -139,7 +160,6 @@ const Dashboard = () => {
             <RequestBtn>
               <Modalforms open={opened} close={close} />
               <GenericBtn
-                tooltip="Start the process of marking your files"
                 type="button"
                 title="Mark sheets"
                 sx={{
@@ -148,6 +168,9 @@ const Dashboard = () => {
                   fontSize: '0.8rem',
                   fontWeight: 'bolder',
                   color: '#fff',
+                  '&:hover': {
+                    background: THEME.colors.background.primary,
+                  },
                 }}
                 onClick={open}
               />
@@ -184,17 +207,21 @@ const Dashboard = () => {
                   type="button"
                   title="Mark sheets"
                   sx={{
-                    fontSize: '0.8rem',
-                    borderRadius: '20px',
-                    padding: '0 1rem',
+                    fontSize: '1rem',
+                    borderRadius: '30px',
+                    width: '10rem',
+                    height: '4rem',
                     color: '#fff',
-                    fontWeight: 'bold',
+                    background: THEME.colors.background.jet,
+                    '&:hover': {
+                      background: THEME.colors.background.primary,
+                    },
                   }}
                   onClick={open}
                 />
               </RequestBtn>
               <Text
-                c="#CCCCCC"
+                c={THEME.colors.text.primary}
                 sx={{ fontFamily: 'poppins, sans-serif' }}
                 ta="left"
                 fz="0.9rem"
@@ -220,7 +247,7 @@ const Dashboard = () => {
                 }}
               >
                 <RFContent>
-                  {recentEntry.map((entry, index) => (
+                  {Constants.RECENTENTRY.map((entry, index) => (
                     <SharedCard
                       key={index}
                       name_of_file={entry.name}

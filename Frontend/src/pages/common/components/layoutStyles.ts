@@ -7,8 +7,16 @@ export const sx = {
     color: THEME.colors.text.primary,
   },
   input: {
-    background: THEME.colors.background.jet,
+    background: 'transparent',
+    height: '3rem',
+    borderRadius: '0.6rem',
+    width: '100%',
     color: THEME.colors.text.primary,
+    border: `1px solid ${THEME.colors.background.jet}`,
+    '&:focus': {
+      border: `1px solid #fff`, // Change the border color when focused
+      outline: 'none', // Optional: removes the default focus outline
+    }
   },
 };
 

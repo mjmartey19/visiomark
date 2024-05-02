@@ -13,7 +13,8 @@ export const THEME = {
 
     button: {
       primary: '#333333',
-      midnight_green: '#333333',
+      black: '#000000',
+      midnight_green: '#CCCCCC',
     },
   },
 };

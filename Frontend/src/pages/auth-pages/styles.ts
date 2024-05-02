@@ -31,6 +31,8 @@ export const InputWrapper = styled.form`
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding-top:2rem;
+  width: 32rem;
 `;
 
 export const GenericTextInput = styled(TextInput)`
