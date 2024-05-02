@@ -92,7 +92,7 @@ const Dashboard = () => {
           Welcome back, let’s get started
         </Text>
 
-        {!recentEntries ? (
+        {recentEntries ? (
           <div
             style={{
               paddingTop: '3rem',

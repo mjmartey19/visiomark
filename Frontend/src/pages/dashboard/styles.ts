@@ -26,7 +26,7 @@ export const Title = styled.p`
 export const RFContent = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 1.5rem;
+  gap: 1rem;
   height: 100%;
 `;
 
