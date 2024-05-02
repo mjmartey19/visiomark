@@ -7,9 +7,19 @@ import GenericInput from '../common/components/input';
 import GenericBtn from '../common/components/button';
 import { THEME } from '../../appTheme';
 import { SelectInput } from '../common/components/SelectInput';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Constants } from '../../utils/constants';
-import { Group, Loader, Stepper, Badge, Box, ScrollArea } from '@mantine/core';
+import {
+  Group,
+  Loader,
+  Stepper,
+  Badge,
+  Box,
+  ScrollArea,
+  StepperProps,
+  rem,
+  Text,
+} from '@mantine/core';
 import MasterKeyPage from '../master-key';
 import { schema } from './schema';
 import useDashboard from './hook/useDashboard';
@@ -66,10 +76,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   return (
     <>
       <ModalComp opened={open} close={close}>
-        <LogoWrapper>
-          <img src="/src/assets/logo.svg" width={40} alt="logo" />
-          <Title>visioMark</Title>
-        </LogoWrapper>
         {mutate.isLoading ? (
           <LoaderWrapper>
             <Loader />
@@ -82,21 +88,16 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
               <Stepper
                 active={active}
                 onStepClick={setActive}
-                styles={{
-                  stepLabel: {
-                    color: `${THEME.colors.button.primary}`,
-                  },
-                }}
+                color={`${THEME.colors.background.jet}`}
+                size="sm"
               >
-                <Stepper.Step label="Step 1">
+                <Stepper.Step>
                   <ModalInputs>
                     <GenericInput
                       {...form.getInputProps('lecturer_name')}
                       placeholder="Kojo Nkansah"
                       val_name="lecturer_name"
                       label="Name of Lecturer"
-                      textInput
-                      icon
                     />
 
                     <GenericInput
@@ -104,21 +105,17 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       placeholder="COE 343"
                       val_name="course_code"
                       label="Course code"
-                      textInput
-                      icon
                     />
 
                     <GenericInput
                       val_name="department_code"
                       placeholder="050"
                       label="Department code"
-                      textInput
                       type="number"
-                      icon
                     />
                   </ModalInputs>
                 </Stepper.Step>
-                <Stepper.Step label="step 2">
+                <Stepper.Step>
                   <ModalInputs>
                     <SelectInput
                       label="Year"
@@ -136,50 +133,111 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       placeholder="40"
                       val_name="number_of_questions"
                       label="Total count of questions"
-                      textInput
-                      icon
                     />
                     <GenericBtn
                       title="Select Folder"
                       onClick={handleFolderSelect}
                       type="button"
                       sx={{
-                        height: '2rem',
+                        height: '2.5rem',
                         width: '100%',
                         fontSize: '1rem',
-                        background: `${THEME.colors.button.primary}`,
+                        background: '#fff',
+                        borderRadius: '10px',
+                        color: `${THEME.colors.background.black}`,
+
+                        '&:hover': {
+                          background: THEME.colors.button.midnight_green,
+                        },
                       }}
                     />
                     {selectedFolder && (
-                      <Badge
-                        pl={0}
-                        size="lg"
-                        color={`${THEME.colors.text.primary}`}
-                        radius="xl"
+                      <Text
+                        c={THEME.colors.text.primary}
+                        sx={{ fontFamily: 'poppins, sans-serif' }}
+                        ta="center"
+                        fz="0.8rem"
+                        fw={500}
                       >
-                        <p>{selectedFolder}</p>
-                      </Badge>
+                        {selectedFolder}
+                      </Text>
                     )}
                   </ModalInputs>
                 </Stepper.Step>
                 <Stepper.Completed>
-                  <KeyheadStyles>Select the correct answers</KeyheadStyles>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      width: '90%'
+                    }}
+                  >
+                    <KeyheadStyles>Select the correct answers</KeyheadStyles>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '1rem',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text
+                        c={THEME.colors.text.primary}
+                        sx={{
+                          fontFamily: 'poppins, sans-serif',
+                          textDecoration: 'underline',
+                        }}
+                        ta="center"
+                        fz="0.8rem"
+                        fw={500}
+                      >
+                        Mark(S)
+                      </Text>
+                      <Text
+                        c={THEME.colors.text.primary}
+                        sx={{
+                          fontFamily: 'poppins, sans-serif',
+                          textDecoration: 'underline',
+                        }}
+                        
+                        ta="center"
+                        fz="0.8rem"
+                        fw={500}
+                      >
+                        Bonus
+                      </Text>
+                    </div>
+                  </div>
+
                   <DisplayDivMultipleTimes />
                 </Stepper.Completed>
               </Stepper>
 
               <br />
 
-              <Group position="center" mt="xl">
+              <Group
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0 0 3rem 0',
+                }}
+                position="center"
+                mt="xl"
+              >
                 <GenericBtn
                   title="Back"
                   type="button"
                   onClick={prevStep}
                   sx={{
-                    height: '2rem',
-                    width: '5rem',
-                    fontSize: '1rem',
-                    background: `${THEME.colors.button.primary}`,
+                    fontSize: '0.8rem',
+                    borderRadius: '20px',
+                    padding: '0 3rem',
+                    color: `#fff`,
+                    background: `${THEME.colors.background.jet}`,
+                    '&:hover': {
+                      background: THEME.colors.background.primary,
+                    },
                   }}
                 />
                 {active != 2 ? (
@@ -188,10 +246,15 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                     type="button"
                     onClick={nextStep}
                     sx={{
-                      height: '2rem',
-                      width: '5rem',
-                      fontSize: '1rem',
-                      background: `${THEME.colors.button.primary}`,
+                      fontSize: '0.8rem',
+                      borderRadius: '20px',
+                      padding: '0 3rem',
+                      color: '#000000',
+                      background: '#fff',
+
+                      '&:hover': {
+                        background: THEME.colors.button.midnight_green,
+                      },
                     }}
                   />
                 ) : null}
@@ -202,10 +265,15 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                     type="submit"
                     onClick={() => validateData(form.values)}
                     sx={{
-                      height: '2rem',
-                      width: '5rem',
-                      fontSize: '1rem',
-                      background: `${THEME.colors.button.primary}`,
+                      fontSize: '0.8rem',
+                      borderRadius: '20px',
+                      padding: '0 3rem',
+                      color: '#000000',
+                      background: '#fff',
+
+                      '&:hover': {
+                        background: THEME.colors.button.midnight_green,
+                      },
                     }}
                   />
                 ) : null}

@@ -4,14 +4,16 @@ import { THEME } from '../../../appTheme';
 const useStyles = createStyles((theme) => ({
   modal: {
     '& .mantine-Modal-header': {
-      background: `${THEME.colors.background.secondary}`,
+      background: `${THEME.colors.background.black}`,
+      padding: '0 0 1rem 0'
     },
 
     '& .mantine-Paper-root': {
-      background: `${THEME.colors.background.secondary}`,
+      background: `${THEME.colors.background.black}`,
       color: `${THEME.colors.text.primary}`,
-      // height: '80vh',
+      border: `1px solid ${THEME.colors.text.primary}`,
       overflowY: 'hidden',
+      padding: '1rem 2rem 4rem 2rem',
     },
   },
 }));

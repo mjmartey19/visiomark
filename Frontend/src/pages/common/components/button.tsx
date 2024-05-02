@@ -19,7 +19,6 @@ const GenericBtn = ({
       <Button
         sx={[
           {
-            background: `${THEME.colors.button.primary}`,
             fontFamily: 'Poppins',
             fontWeight: 'bold',
           },

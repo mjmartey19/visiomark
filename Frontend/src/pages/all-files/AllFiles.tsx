@@ -1,31 +1,194 @@
 import { BaseDirectory, FileEntry, readDir } from '@tauri-apps/api/fs';
 import Layout from '../common/components/Layout';
-import { ScrollArea, Text } from '@mantine/core';
+import { ScrollArea, Text, Button, Select } from '@mantine/core'; // Added Button for pagination
 import { AllFilesContainer, StyledRefreshIcon, TitleStyles } from './styles';
 import SharedCard from '../common/components/Card/card';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Changed to useEffect
+import { Constants } from '../../utils/constants';
+import { THEME } from '../../appTheme';
+import styled from 'styled-components';
 
-const entries = await readDir('visioMark', {
-  dir: BaseDirectory.Document,
-  recursive: true,
-});
+const ITEMS_PER_PAGE = 8; // Number of items to show per page
+
+const StyledSelect = styled(Select)`
+  /* Example styles */
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 16px;
+  background: 'transparent'
+
+  .mantine-select-dropdown {
+    /* Example styles */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #000 !important;
+  }
+
+  .mantine-select-option {
+    /* Example styles */
+    padding: 8px 12px;
+    cursor: pointer;
+    background-color: black;
+  }
+
+  .mantine-select-item {
+    /* Example styles */
+    padding: 8px;
+  }
+`;
+
+type Entry = {
+  name: string;
+  entry: {
+    path: string;
+    name: string;
+  };
+  academic_year: string;
+  marked_time: string;
+};
+const entries: Entry[] = [
+  {
+    name: 'COE 354_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '2 minutes ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+  {
+    name: 'COE 324_050.csv',
+    entry: {
+      path: '/path/to/file.txt',
+      name: 'file.txt',
+    },
+    academic_year: '2023/2024',
+    marked_time: '1 day ago',
+  },
+];
 
 const AllFiles = () => {
-  const [allFiles, setAllFiles] = useState<FileEntry[]>([]);
+  const [allFiles, setAllFiles] = useState<Entry[]>(entries);
+  const [currentPage, setCurrentPage] = useState(1); // State to track current page
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(
+    null
+  );
+  const [selectedYear, setSelectedYear] = useState<string | null>(null);
+
+  // useEffect(() => {
+  //   // Load files when component mounts
+  //   async function loadFiles() {
+  //     const entries = await readDir('visioMark', {
+  //       dir: BaseDirectory.Document,
+  //       recursive: true,
+  //     });
+  //     setAllFiles(entries);
+  //   }
+  //   loadFiles();
+  // }, []); // Empty dependency array to run only once on mount
 
   const handleClick = () => {
+    // Refresh the page
     window.location.reload();
   };
 
-  // (function processEntries(entries: FileEntry[]) {
-  //   for (const entry of entries) {
-  //     console.log(entry.children);
-  //     if (entry.children) {
-  //       setAllFiles((prev) => [...prev, entry]);
-  //       processEntries(entries);
-  //     }
-  //   }
-  // })(entries);
+  const totalPages = Math.ceil(allFiles.length / ITEMS_PER_PAGE); // Calculate total pages
+
+  // Pagination event handlers
+  const nextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  const prevPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  // Calculate start and end indexes for the current page
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  const courseOptions = Array.from({ length: 100 }, (_, i) => `COE ${i + 1}`);
+  const departmentOptions = Array.from(
+    { length: 100 },
+    (_, i) => ` ${i + 100}`
+  );
+  const academicYearOptions = ['2022/2023', '2023/2024']; // Sample options for Academic Year filter
 
   return (
     <Layout>
@@ -40,29 +203,126 @@ const AllFiles = () => {
       >
         <TitleStyles>
           <Text
-            variant="gradient"
-            gradient={{ from: '#ffff', to: 'cyan', deg: 45 }}
+            c="#fff"
             sx={{ fontFamily: 'Greycliff CF, sans-serif' }}
             ta="left"
             fz="2rem"
             fw={700}
           >
-            ALL FILES
+            All Files
           </Text>
-          <StyledRefreshIcon size={25} onClick={handleClick} />
+          <StyledRefreshIcon size={20} onClick={handleClick} />
         </TitleStyles>
-        <ScrollArea
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              padding: '10px 15px 10px 0',
+            }}
+          >
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', paddingBottom: '2rem' }}
+            >
+              <Text
+                c="#fff"
+                sx={{ fontFamily: 'Greycliff CF, sans-serif' }}
+                ta="left"
+                fz="1rem"
+              >
+                Filtered by:
+              </Text>
+              {/* Dropdowns for filters */}
+
+              <StyledSelect
+                placeholder="Select Course Code"
+                searchable
+                data={courseOptions}
+                value={selectedCourse}
+                limit={5}
+                onChange={(value) => setSelectedCourse(value)}
+              />
+
+              <StyledSelect
+                placeholder="Select Department Code"
+                searchable
+                data={departmentOptions}
+                value={selectedDepartment}
+                limit={5}
+                onChange={(value) => setSelectedDepartment(value)}
+                style={{ minWidth: '150px' }}
+              />
+              <StyledSelect
+                placeholder="Select Academic Year"
+                searchable
+                data={academicYearOptions}
+                value={selectedYear}
+                onChange={(value) => setSelectedYear(value)}
+                style={{ minWidth: '150px' }}
+              />
+            </div>
+            <AllFilesContainer>
+              {/* Render items based on current page */}
+              {entries.slice(startIndex, endIndex).map((entry, index) => (
+                <SharedCard
+                  key={index}
+                  name_of_file={entry.name}
+                  academic_year={entry.academic_year}
+                  marked_time={entry.marked_time}
+                  entry={entry}
+                />
+              ))}
+            </AllFilesContainer>
+          </div>
+        </div>
+        {/* Pagination controls */}
+        <div
           style={{
-            // height: '39vh',
-            padding: '10px 15px 10px 0',
+            display: 'flex',
+            width: '90%',
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}
         >
-          <AllFilesContainer>
-            {entries.map((entry, index) => (
-              <SharedCard key={index} name_of_file={entry.name} entry={entry} />
-            ))}
-          </AllFilesContainer>
-        </ScrollArea>
+          <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <Button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 'bolder',
+                color: '#fff',
+                background:
+                  currentPage === 1 ? '#888' : THEME.colors.background.primary,
+              }}
+            >
+              Previous
+            </Button>
+
+            <Button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 'bolder',
+                color: '#fff',
+                background:
+                  currentPage === totalPages
+                    ? '#888'
+                    : THEME.colors.background.primary,
+              }}
+            >
+              Next
+            </Button>
+          </div>
+          <span
+            style={{
+              margin: '0 0.6rem',
+              color: THEME.colors.text.primary,
+              fontSize: '0.8rem',
+            }}
+          >
+            Page {currentPage} of {totalPages}
+          </span>
+        </div>
       </div>
     </Layout>
   );

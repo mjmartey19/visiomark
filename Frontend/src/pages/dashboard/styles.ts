@@ -7,7 +7,7 @@ export const RequestBtn = styled.div`
   align-items: center;
   background: ${THEME.colors.background.jet};
   margin-top: 0.4rem;
-  border-radius: 20px;
+  border-radius: 30px;
   width: fit-content;
 `;
 
@@ -25,6 +25,7 @@ export const Title = styled.p`
 
 export const RFContent = styled.div`
   display: flex;
+  flex-wrap:wrap;
   flex-direction: row;
   gap: 1rem;
   height: 100%;
@@ -33,7 +34,8 @@ export const RFContent = styled.div`
 export const ModalInputs = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+  width: 100%;
 `;
 
 export const LoaderWrapper = styled.div`
@@ -46,9 +48,9 @@ export const LoaderWrapper = styled.div`
 `;
 
 export const KeyheadStyles = styled.p`
-  font-size: 18px;
+  font-size: 1.7rem;
   font-weight: bold;
-  letter-spacing: 2px;
-  text-align: center;
+  fontFamily: poppins;
+  padding-left: 5rem;
   color: ${THEME.colors.text.primary};
 `;

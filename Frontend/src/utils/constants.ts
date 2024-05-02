@@ -8,6 +8,7 @@ export const Constants = {
     allfiles: '/allfiles',
     preview: '/preview',
     statistics: '/statistics',
+    logout: '/logout'
   },
   ACADEMIC_LEVELS: [
     {
@@ -57,4 +58,45 @@ export const Constants = {
       label: '2023/2024',
     },
   ],
+
+  RECENTENTRY : [
+    {
+      name: 'COE 354_050.csv',
+      entry: {
+        "path": "/path/to/file.txt",
+        "name": "file.txt",
+      },
+      academic_year: '2023/2024',
+      marked_time: '2 minutes ago'
+    },
+    {
+      name: 'COE 324_050.csv',
+      entry: {
+        "path": "/path/to/file.txt",
+        "name": "file.txt",
+      },
+      academic_year: '2023/2024',
+      marked_time: '1 day ago'
+    },
+    {
+      name: 'COE 324_050.csv',
+      entry: {
+        "path": "/path/to/file.txt",
+        "name": "file.txt",
+      },
+      academic_year: '2023/2024',
+      marked_time: '1 day ago'
+    },
+    {
+      name: 'ME 304_156.csv',
+      entry: {
+        "path": "/path/to/file.txt",
+        "name": "file.txt",
+      },
+      academic_year: '2023/2024',
+      marked_time: '2 days ago'
+    },
+    
+  ],
+
 };

@@ -62,7 +62,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   borderRadius: '20px',
                   padding: '0 1rem',
                   color:  '#000000',
-                  background: `#fff`,
+                  background: '#fff',
+                  
+                  '&:hover': {
+                    background: THEME.colors.button.midnight_green,
+                  },
                 }}
                 onClick={open}
               />
@@ -78,10 +82,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   padding: '0 1.5rem',
                   color:   `#fff`,
                   background: `${THEME.colors.background.jet}`,
+                  '&:hover': {
+                    background: THEME.colors.background.primary,
+                  },
                 }}
-              
               />
-
 
           </div>
       </TopbarContainer>
@@ -145,7 +150,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 Settings
               </NavLinks>
             </Navigation>
-            <NavLinks to={`${Constants.PATHS.settings}`}
+            <NavLinks to={`${Constants.PATHS.logout}`}
              aria-label="settings of the user"
             >
 
