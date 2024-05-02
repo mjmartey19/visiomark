@@ -15,7 +15,7 @@ const GenericBtn = ({
   tooltip?: string;
 }) => {
   return (
-    <Tooltip label={tooltip} withArrow position="top-start">
+    <Tooltip color={`${THEME.colors.background.primary}`} label={tooltip} withArrow position="top-start">
       <Button
         sx={[
           {

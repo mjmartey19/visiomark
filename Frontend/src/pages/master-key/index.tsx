@@ -1,4 +1,4 @@
-import { Flex, Group, Text } from '@mantine/core';
+import { Checkbox, Flex, Group, Text, TextInput } from '@mantine/core';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { THEME } from '../../appTheme';
@@ -89,18 +89,45 @@ const MasterKeyPage = ({
             E
           </ChoiceStyles>
         </div>
-        <MarkStyle
-          type="text"
+        <TextInput
+          type="number"
+          maxLength={1}
           value={markValue}
           onChange={(e) => setMarkValue(parseInt(e.target.value))}
+          styles={{
+            input: {
+              background: 'transparent',
+              border: `1px solid ${THEME.colors.background.jet}`,
+              color: `${THEME.colors.text.primary}`,
+              width: '2.1rem',
+              height: '2.1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              '&:focus': {
+                  borderColor:'#fff'
+              }
+            },
+
+            wrapper: {
+              margin: '10px 0',
+            },
+          }}
         />
 
-        <CheckStyle
-          type="checkbox"
-          checked={isChecked}
-          onChange={(e) => setIsChecked(e.target.checked)}
-        
-        />
+      <Checkbox
+        checked={isChecked}
+        variant="outline"
+        onChange={(event) => setIsChecked(event.currentTarget.checked)}
+        color="gray"
+        sx={{
+          input: {
+            background: 'transparent',
+            border: `1px solid ${THEME.colors.background.jet}`,
+          }
+        }}
+      />
       </Group>
     </Flex>
   );
@@ -130,19 +157,6 @@ const QuestionNumberStyles = styled.p`
   font-size: 1rem;
 `;
 
-const MarkStyle = styled.input`
-  background: transparent;
-  border: 1px solid ${THEME.colors.background.jet};
-  color: ${THEME.colors.text.primary};
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  padding-left: 10px;
-  margin-right: 0.5rem; /* Adjust as needed */
-`;
 
 const CheckStyle = styled.input`
   background: transparant;

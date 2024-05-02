@@ -16,51 +16,6 @@ const entries = await readDir('visioMark', {
   recursive: true,
 });
 
-// type RecentEntry = {
-//   name: string;
-//   entry: FileEntry; // Reference to another entry by index in the recentEntry array
-//   academic_year: string;
-//   marked_time: string;
-// };
-
-// const recentEntry: RecentEntry[] = [
-//   {
-//     name: 'COE 354_050.csv',
-//     entry: {
-//       "path": "/path/to/file.txt",
-//       "name": "file.txt",
-//     },
-//     academic_year: '2023/2024',
-//     marked_time: '2 minutes ago'
-//   },
-//   {
-//     name: 'COE 324_050.csv',
-//     entry: {
-//       "path": "/path/to/file.txt",
-//       "name": "file.txt",
-//     },
-//     academic_year: '2023/2024',
-//     marked_time: '1 day ago'
-//   },
-//   {
-//     name: 'COE 324_050.csv',
-//     entry: {
-//       "path": "/path/to/file.txt",
-//       "name": "file.txt",
-//     },
-//     academic_year: '2023/2024',
-//     marked_time: '1 day ago'
-//   },
-//   {
-//     name: 'ME 304_156.csv',
-//     entry: {
-//       "path": "/path/to/file.txt",
-//       "name": "file.txt",
-//     },
-//     academic_year: '2023/2024',
-//     marked_time: '2 days ago'
-//   },
-// ];
 
 
 const Dashboard = () => {
@@ -113,7 +68,7 @@ const Dashboard = () => {
           Welcome back, let’s get started
         </Text>
 
-        {recentEntries ? (
+        {!recentEntries ? (
           <div
             style={{
               paddingTop: '3rem',
@@ -168,6 +123,7 @@ const Dashboard = () => {
                   fontSize: '0.8rem',
                   fontWeight: 'bolder',
                   color: '#fff',
+                  background: THEME.colors.background.jet,
                   '&:hover': {
                     background: THEME.colors.background.primary,
                   },
@@ -203,7 +159,7 @@ const Dashboard = () => {
               <RequestBtn>
                 <Modalforms open={opened} close={close} />
                 <GenericBtn
-                  tooltip="Start the process of marking your files"
+                  tooltip="Start Marking"
                   type="button"
                   title="Mark sheets"
                   sx={{

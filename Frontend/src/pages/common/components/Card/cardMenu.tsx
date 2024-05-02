@@ -11,7 +11,7 @@ import { Constants } from '../../../../utils/constants';
 import { readCSVFile } from '../../../../utils/helper';
 import { useContext } from 'react';
 import { appContext } from '../../../../utils/Context';
-import { IoMdShare } from "react-icons/io";
+import { LuShare } from "react-icons/lu";
 
 const SharedCardMenu = ({
   name_of_file,
@@ -85,7 +85,7 @@ const SharedCardMenu = ({
 
             <Tooltip label="Share file" position="left">
               <IconContainer>
-                 <IoMdShare  size={20}  color='#fff' style={{ cursor: 'pointer' }} />
+                 <LuShare  size={20}  color='#fff' style={{ cursor: 'pointer' }} />
               </IconContainer>
             </Tooltip>
 

@@ -39,6 +39,7 @@ const SharedCard = ({
       <Card
         sx={{
           background: THEME.colors.background.primary,
+          border: `1px solid ${THEME.colors.background.jet}`,
           color: '#fff',
           display: 'flex',
           justifyContent: 'space-between',

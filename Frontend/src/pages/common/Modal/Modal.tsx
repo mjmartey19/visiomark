@@ -11,7 +11,7 @@ const useStyles = createStyles((theme) => ({
     '& .mantine-Paper-root': {
       background: `${THEME.colors.background.black}`,
       color: `${THEME.colors.text.primary}`,
-      border: `1px solid ${THEME.colors.text.primary}`,
+      border: `1px solid ${THEME.colors.background.jet}`,
       overflowY: 'hidden',
       padding: '1rem 2rem 4rem 2rem',
     },

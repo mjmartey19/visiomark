@@ -14,10 +14,28 @@ export const sx = {
     color: THEME.colors.text.primary,
     border: `1px solid ${THEME.colors.background.jet}`,
     '&:focus': {
-      border: `1px solid #fff`, // Change the border color when focused
-      outline: 'none', // Optional: removes the default focus outline
+      border: `1px solid #fff`, 
+      outline: 'none', 
     }
   },
+  '.mantine-Select-dropdown': {
+    background: `${THEME.colors.background.black}`,
+    border: `1px solid ${THEME.colors.background.jet}`,
+    color:'green',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  '.mantine-Select-item': { 
+    color: `${THEME.colors.text.primary}`, 
+    '&:hover': {
+      background: `#fff`,
+      color: '#000'
+    },
+    '&[aria-selected="true"]': {
+      background:  `#fff`, 
+      color: '#000'
+    }
+  },
+  
 };
 
 export const Dashboardcontainer = styled.div`

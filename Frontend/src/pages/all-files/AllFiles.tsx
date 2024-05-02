@@ -7,38 +7,10 @@ import { useState, useEffect } from 'react'; // Changed to useEffect
 import { Constants } from '../../utils/constants';
 import { THEME } from '../../appTheme';
 import styled from 'styled-components';
+import { sx } from '../common/components/layoutStyles';
 
 const ITEMS_PER_PAGE = 8; // Number of items to show per page
 
-const StyledSelect = styled(Select)`
-  /* Example styles */
-  width: 200px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  font-size: 16px;
-  background: 'transparent'
-
-  .mantine-select-dropdown {
-    /* Example styles */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: #000 !important;
-  }
-
-  .mantine-select-option {
-    /* Example styles */
-    padding: 8px 12px;
-    cursor: pointer;
-    background-color: black;
-  }
-
-  .mantine-select-item {
-    /* Example styles */
-    padding: 8px;
-  }
-`;
 
 type Entry = {
   name: string;
@@ -232,16 +204,17 @@ const AllFiles = () => {
               </Text>
               {/* Dropdowns for filters */}
 
-              <StyledSelect
+              <Select
                 placeholder="Select Course Code"
                 searchable
                 data={courseOptions}
                 value={selectedCourse}
                 limit={5}
+                sx={sx}
                 onChange={(value) => setSelectedCourse(value)}
               />
 
-              <StyledSelect
+              <Select
                 placeholder="Select Department Code"
                 searchable
                 data={departmentOptions}
@@ -249,14 +222,16 @@ const AllFiles = () => {
                 limit={5}
                 onChange={(value) => setSelectedDepartment(value)}
                 style={{ minWidth: '150px' }}
+                sx={sx}
               />
-              <StyledSelect
+              <Select
                 placeholder="Select Academic Year"
                 searchable
                 data={academicYearOptions}
                 value={selectedYear}
                 onChange={(value) => setSelectedYear(value)}
                 style={{ minWidth: '150px' }}
+                sx={sx}
               />
             </div>
             <AllFilesContainer>
@@ -289,9 +264,9 @@ const AllFiles = () => {
               style={{
                 fontSize: '0.8rem',
                 fontWeight: 'bolder',
-                color: '#fff',
+                color:  currentPage === totalPages ? '#000' : THEME.colors.text.primary,
                 background:
-                  currentPage === 1 ? '#888' : THEME.colors.background.primary,
+                  currentPage === 1 ? THEME.colors.background.primary : '#fff',
               }}
             >
               Previous
@@ -303,11 +278,11 @@ const AllFiles = () => {
               style={{
                 fontSize: '0.8rem',
                 fontWeight: 'bolder',
-                color: '#fff',
+                color:  currentPage === totalPages ? THEME.colors.text.primary : '#000',
                 background:
                   currentPage === totalPages
-                    ? '#888'
-                    : THEME.colors.background.primary,
+                    ? THEME.colors.background.primary
+                    : '#fff',
               }}
             >
               Next
