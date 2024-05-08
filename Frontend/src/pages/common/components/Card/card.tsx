@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Text, Tooltip } from '@mantine/core';
 import { THEME } from '../../../../appTheme';
 import { FileEntry } from '@tauri-apps/api/fs';
@@ -9,24 +9,40 @@ import { VscPreview } from 'react-icons/vsc';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Constants } from '../../../../utils/constants';
-import { readCSVFile } from '../../../../utils/helper';
+import { readCSVFile, getMetadata } from '../../../../utils/helper';
 import { useContext } from 'react';
 import { appContext } from '../../../../utils/Context';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import SharedCardMenu from './cardMenu';
+import moment from 'moment';
+
 
 const SharedCard = ({
   name_of_file,
-  academic_year,
-  marked_time,
   entry,
 }: {
   name_of_file: string | undefined;
-  academic_year: string | undefined;
-  marked_time: string | undefined;
   entry: FileEntry;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [metadata, setMetadata] = useState([]); // State should be an array of strings
+
+  const fetchMetaData = async () => {
+    try {
+      const data = await getMetadata(name_of_file); // Fetch metadata
+      setMetadata(data); // Update metadata state
+      console.log(name_of_file)
+    } catch (error) {
+      console.error('Error fetching metadata:', error);
+    }
+    console.log(metadata)
+  };
+
+  useEffect(() => {
+    if (name_of_file) { 
+      fetchMetaData();
+    }
+  }, [name_of_file]);
 
   return (
     <div
@@ -90,7 +106,7 @@ const SharedCard = ({
                 gap: '1rem',
               }}
             >
-              {academic_year}
+              {metadata?.academic_year}
             </Text>
             <Text
               size="xs"
@@ -101,7 +117,7 @@ const SharedCard = ({
                 gap: '1rem',
               }}
             >
-              {marked_time}
+              {moment(metadata?.createdAt ).fromNow()}
             </Text>
           </div>
         </div>

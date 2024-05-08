@@ -206,8 +206,6 @@ const Dashboard = () => {
                     <SharedCard
                       key={index}
                       name_of_file={entry.name}
-                      academic_year={'2023/2024'}
-                      marked_time={'2 days ago'}
                       entry={entry}
                     />
                   ))}

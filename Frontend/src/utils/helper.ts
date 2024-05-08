@@ -35,7 +35,7 @@ console.log(data)
   }
 };
 
-export const readMetadataFile = async (name_of_file?: string) => {
+export const getMetadata = async (name_of_file?: string) => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
@@ -65,6 +65,7 @@ export const readMetadataFile = async (name_of_file?: string) => {
     // Find the metadata corresponding to the file name
     const metadata = metadataData.find((metadataItem) => metadataItem.file_name === name_of_file);
 
+    console.log(metadata)
     return metadata;
   } catch (error) {
     console.log(error);
