@@ -7,6 +7,27 @@ from datetime import datetime
 import csv
 import os
 
+from datetime import datetime, timedelta
+
+def set_current_academic_year():
+    """
+    Set the current academic year based on the current date.
+    Assumes the academic year starts in September.
+    """
+    current_date = datetime.now()
+    if current_date.month >= 9:  # Academic year starts in September
+        start_year = current_date.year
+        end_year = start_year + 1
+    else:
+        end_year = current_date.year
+        start_year = end_year - 1
+    return f"{start_year}/{end_year}"
+
+def get_current_datetime():
+    current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    return current_datetime
+    
+
 # Labeled Training Data (Integer Encoding)
 def index_to_label(index: int): 
     shading= {
@@ -57,46 +78,62 @@ def mark_predictions(prediction: Dict[int, str],  master_key: Dict[str, str]) ->
             count += 1
 
     return count
-
-def save_response_to_csv(response: Dict[str, Dict[int, str]], output_file: str) -> None:
-    import csv
-    with open(output_file, 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(['file_name', 'predictions', 'score'])
-        for key in response:
-            writer.writerow([key, response[key]['predictions'], response[key]['score']])
             
 
-def a(response_data):
-    # Generate a dynamic part for the file name using the current timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+def save_response_to_csv(response_data, course_code):
+    academic_year = set_current_academic_year()
+    createdAt = get_current_datetime()
+    # Create the CSV file path with the dynamic part in the file name
+    predictions_csv_file_name  = f"{course_code}.csv"
+    predictions_csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", predictions_csv_file_name)
 
-    # # Create the CSV file path with the dynamic part in the file name
-    csv_file_name = f"predictions_{timestamp}.csv"
-    # csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", csv_file_name)
-    os.makedirs('output_csv', exist_ok=True)
-    csv_file_path = os.path.join('output_csv', csv_file_name)
-    
-
-    # Check if the CSV file already exists
-    file_exists = os.path.isfile(csv_file_path)
+   # Check if the predictions CSV file already exists
+    predictions_file_exists = os.path.isfile(predictions_csv_file_path)
 
     # Extract the keys for the CSV header
-    header = ['file_name', 'predictions', 'score']
+    predictions_header = ['file_name', 'predictions', 'score', 'index_number']
 
-    # Write the response data to the CSV file
-    with open(csv_file_path, 'w', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=header)
-        if not file_exists:
-            writer.writeheader()
+    # Write the response data to the predictions CSV file
+    with open(predictions_csv_file_path, 'w', newline='') as predictions_csv_file:
+        writer = csv.DictWriter(predictions_csv_file, fieldnames=predictions_header)
+        writer.writeheader()
         writer.writerows([
-        {
-            'file_name': item['file_name'],
-            'predictions': ', '.join(item['predictions'].values()),
-            'score': item['score']
-        }
-        for item in response_data
-    ])
+            {
+                'file_name': item['file_name'],
+                'predictions': ', '.join(item['predictions'].values()),
+                'score': item['score'],
+                'index_number': item['index_number']
+            }
+            for item in response_data
+        ])
 
-    print(f"CSV file saved at: {csv_file_path}")
+
+    # Create a separate CSV file for metadata
+    metadata_file_name = f"metadata.csv"
+    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", metadata_file_name)
+
+    # Check if the metadata CSV file already exists
+    metadata_file_exists = os.path.isfile(metadata_file_path)
+
+    # Extract the keys for the metadata CSV header
+    metadata_header = ['file_name', 'academic_year', 'createdAt']
+
+    academic_year = set_current_academic_year()
+    createdAt = get_current_datetime()
+    # Write the metadata to the metadata CSV file
+    with open(metadata_file_path, 'a', newline='') as metadata_file:
+        metadata_writer = csv.DictWriter(metadata_file, fieldnames=metadata_header)
+        if not metadata_file_exists:
+            metadata_writer.writeheader()
+        metadata_writer.writerow({
+            'file_name': predictions_csv_file_name,
+            'academic_year': academic_year,
+            'createdAt': createdAt
+        })
+
+    print(f"Metadata saved at: {metadata_file_path}")
+    print(f"CSV file with predictions saved at: {predictions_csv_file_path}")
+
+    return predictions_csv_file_name
+
         

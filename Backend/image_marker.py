@@ -152,7 +152,7 @@ class ImageMarker:
 
         # Crop the image based on the contour
         idxno_image = gray_img[y:y+h, x:x+w]
-        cv2.imshow("idxno_image", idxno_image)
+        # cv2.imshow("idxno_image", idxno_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

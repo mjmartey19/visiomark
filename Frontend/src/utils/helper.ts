@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { appContext } from './Context';
-import { BaseDirectory, readTextFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, readTextFile, removeFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
 
 export const readCSVFile = async ({
@@ -12,23 +12,79 @@ export const readCSVFile = async ({
     const result = await readTextFile(`visioMark\\${name_of_file}`, {
       dir: BaseDirectory.Document,
     });
-    const csvData = result.split('\n');
-    const data: ITableDataProps[] = [];
-    for (const row of csvData) {
+    const csvData = result.trim().split('\n');
+
+      // Remove the first row (headers)
+      csvData.shift();
+      
+    const data = csvData.map(row => {
       const rowData = row.split(',');
       const item = {
         file_name: rowData[0],
-        predictions: rowData[1],
-        score: Number(rowData[2]),
-        'index number': rowData[3],
+        predictions: rowData.slice(1, -2).join(',').replace(/^"(.*)"$/, '$1'), // Joining predictions separated by commas and remove qoute around it.
+        score: Number(rowData[rowData.length - 2]), // Taking the second last element as score
+        'index number': rowData[rowData.length - 1].trim(), // Trimming whitespace
       };
-      data.push(item);
-    }
-    const newData = data.splice(-1, 1);
-    return data.splice(1);
+      return item;
+    });
+console.log(data)
+    return data;
   } catch (error) {
     console.log(error);
     return;
+  }
+};
+
+export const readMetadataFile = async (name_of_file?: string) => {
+  try {
+    if (!name_of_file) {
+      throw new Error('File name is required');
+    }
+
+    // Read metadata CSV file
+    const metadataResult = await readTextFile(`visioMark\\metadata.csv`, {
+      dir: BaseDirectory.Document,
+    });
+
+    const metadataCsvData = metadataResult.trim().split('\n');
+    
+    // Remove the first row (headers)
+    metadataCsvData.shift();
+
+    // Parse metadata CSV data
+    const metadataData = metadataCsvData.map((row) => {
+      const rowData = row.split(',');
+      const item = {
+        file_name: rowData[0],
+        academic_year: rowData[1],
+        createdAt: rowData[2].trim(),
+      };
+      return item;
+    });
+
+    // Find the metadata corresponding to the file name
+    const metadata = metadataData.find((metadataItem) => metadataItem.file_name === name_of_file);
+
+    return metadata;
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+};
+
+export const deleteCSVFile = async ({
+  name_of_file,
+}: {
+  name_of_file?: string;
+}) => {
+  try {
+    await removeFile(`visioMark\\${name_of_file}`, {
+      dir: BaseDirectory.Document,
+    });
+    console.log(`File ${name_of_file} deleted successfully.`);
+    window.location.reload();
+  } catch (error) {
+    console.error(`Error deleting file ${name_of_file}:`, error);
   }
 };
 
@@ -127,4 +183,935 @@ export function calculateDifficultyLevels(
   );
 
   return data;
+}
+
+export function generateCourseCodes() {
+  const programs = [
+    'PHY',
+    'CE',
+    'SP',
+    'SOC',
+    'ECON',
+    'ENG',
+    'MATH',
+    'BIO',
+    'CS',
+    'PSY',
+    'CHM',
+    'BUS',
+    'ART',
+    'MECH',
+    'HIST',
+    'ARCH',
+    'POLI',
+    'LANG',
+    'ELEC',
+    'ANTH',
+    'CHEM',
+    'STAT',
+    'PHIL',
+    'COMM',
+    'FIN',
+    'GEOG',
+    'LAW',
+    'MED',
+    'THEA',
+    'NURS',
+    'ECE',
+    'ASTR',
+    'CRM',
+    'MKT',
+    'GEO',
+    'EDU',
+    'GEOL',
+    'ENVR',
+    'COMP',
+    'ARTH',
+    'FNCE',
+    'ESL',
+    'LING',
+    'HUM',
+    'ACCT',
+    'ME',
+    'PSYC',
+    'HOSP',
+    'FREN',
+    'ANAT',
+    'LIT',
+    'GERM',
+    'RES',
+    'JOUR',
+    'AH',
+    'REL',
+    'PH',
+    'BIOL',
+    'IT',
+    'KIN',
+    'PHILO',
+    'AGRI',
+    'FLM',
+    'EDD',
+    'COM',
+    'BUSI',
+    'POLS',
+    'SSCI',
+    'ELT',
+    'KINE',
+    'MGT',
+    'TH',
+    'PSC',
+    'PHL',
+    'VET',
+    'AE',
+    'PLS',
+    'CHE',
+    'MEA',
+    'CRJ',
+    'A&S',
+    'SOWK',
+    'NUTR',
+    'CST',
+    'BME',
+    'GS',
+    'IEL',
+    'AST',
+    'PS',
+    'PPE',
+    'GE',
+    'URP',
+    'MSE',
+    'WR',
+    'CM',
+    'IDS',
+    'ELED',
+    'CNST',
+    'CEE',
+    'BIOE',
+    'RUS',
+    'LSA',
+    'CHBE',
+    'ICS',
+    'ANSC',
+    'BINF',
+    'AEM',
+    'HDFS',
+    'INTL',
+    'LS',
+    'GPH',
+    'ASTRON',
+    'MSENG',
+    'DSGN',
+    'ESE',
+    'WGS',
+    'HR',
+    'GEOG/ENVS',
+    'AHST',
+    'BS',
+    'US',
+    'NRE',
+    'GWS',
+    'NEUR',
+    'CJ',
+    'RST',
+    'CPLT',
+    'SCLG',
+    'IME',
+    'CRS',
+    'MEDH',
+    'LSJ',
+    'IB',
+    'MCB',
+    'AHS',
+    'MUS',
+    'GLG',
+    'ED',
+    'PSYCH',
+    'BUSN',
+    'OE',
+    'HB',
+    'MDVL',
+    'PSIO',
+    'PADM',
+    'MA',
+    'ID',
+    'PLB',
+    'AP',
+    'CEP',
+    'SJ',
+    'BIOME',
+    'APPL',
+    'AB',
+    'EAS',
+    'CB',
+    'APS',
+    'EDP',
+    'NS',
+    'NAS',
+    'DPS',
+    'SCI',
+    'RSM',
+    'SOCW',
+    'SOCIO',
+    'SCB',
+    'COGSCI',
+    'SOCIOLOGY',
+    'COE',
+    'CEE',
+    'EE',
+    'ME',
+    'BME',
+    'IE',
+    'CompE',
+    'AE',
+    'NRE',
+    'NE',
+    'CHE',
+    'BSE',
+    'MSE',
+    'EnvE',
+    'ChBE',
+    'MatE',
+    'WE',
+    'SystemsE',
+    'MSWE',
+    'CEE',
+    'AeroE',
+    'GeosystemsE',
+    'EnviroE',
+    'PetE',
+    'ArchE',
+    'MEAM',
+    'CS',
+    'CIS',
+    'NETS',
+    'DS',
+    'Robotics',
+    'SCS',
+    'MCS',
+    'CIT',
+    'IS',
+    'IST',
+    'InfoSec',
+    'HC',
+    'HCDS',
+    'ESE',
+    'DSGE',
+    'ROBO',
+    'ISD',
+    'ROB',
+    'MEM',
+    'CADRE',
+    'RBE',
+    'HRD',
+    'EED',
+    'CPE',
+    'CEM',
+    'EIT',
+    'AM',
+    'CEng',
+    'PE',
+    'PME',
+    'EPE',
+    'ENE',
+    'MSF',
+    'HPC',
+    'ST',
+    'GIS',
+    'QBA',
+    'Econometrics',
+    'RD',
+    'EMS',
+    'ERM',
+    'MSC',
+    'ESE',
+    'EMSE',
+    'CPS',
+    'ES',
+    'FSE',
+    'AI',
+    'CyberSec',
+    'DCS',
+    'AS',
+    'BioE',
+    'CEM',
+    'ESTM',
+    'RES',
+    'GES',
+    'SE',
+    'SDM',
+    'RE',
+    'RESD',
+    'UE',
+    'BE',
+    'SE',
+    'SEIE',
+    'SD',
+    'MSP',
+    'ESG',
+    'SD',
+    'ESD',
+    'RESD',
+    'MET',
+    'ERP',
+    'EPM',
+    'CM',
+    'IS',
+    'PDM',
+    'ME',
+    'ISE',
+    'ES',
+    'EM',
+    'MSI',
+    'IM',
+    'PMM',
+    'PMT',
+    'EA',
+    'SER',
+    'CME',
+    'ERE',
+    'HFE',
+    'HM',
+    'IS',
+    'QM',
+    'MSTE',
+    'PDDM',
+    'EMT',
+    'CMT',
+    'SEMS',
+    'MSD',
+    'EIS',
+    'SIE',
+    'ES',
+    'ESE',
+    'IME',
+    'BE',
+    'BME',
+    'ISE',
+    'IEOR',
+    'EECS',
+    'ISEM',
+    'HFE',
+    'CA',
+    'BME',
+    'CMT',
+    'EMT',
+    'EPM',
+    'CSM',
+    'SMM',
+    'ECM',
+    'MIS',
+    'SSM',
+    'IE',
+    'IS',
+    'PD',
+    'ED',
+    'IET',
+    'AAM',
+    'MSME',
+    'EEM',
+    'MSEM',
+    'EMD',
+    'MIS',
+    'SDE',
+    'MSDE',
+    'EME',
+    'ESD',
+    'EDE',
+    'EDEM',
+    'EMT',
+    'SE',
+    'FSE',
+    'ESM',
+    'EST',
+    'MSEM',
+    'EM',
+    'EME',
+    'SE',
+    'HMS',
+    'SMS',
+    'EMI',
+    'MCI',
+    'SDE',
+    'MSC',
+    'MSD',
+    'MIM',
+    'SE',
+    'MSE',
+    'SRE',
+    'EME',
+    'CMT',
+    'EMI',
+    'ESM',
+    'MSC',
+    'MSEM',
+    'EMS',
+    'EME',
+    'EE',
+    'SE',
+    'MSE',
+    'MSD',
+    'EMI',
+    'SMSE',
+    'SDE',
+    'MSDE',
+    'EEM',
+    'MIM',
+    'EMT',
+    'EM',
+    'MSEM',
+    'MIM',
+    'EMI',
+    'SMSE',
+    'SDE',
+    'MSDE',
+    'SE',
+    'EME',
+    'MSE',
+    'MSD',
+    'EMI',
+    'EMT',
+    'EM',
+    'MIM',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'EME',
+    'MSEM',
+    'SDE',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SE',
+    'MSE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+    'EEM',
+    'MSEM',
+    'EMI',
+    'SDE',
+    'EM',
+    'MSD',
+    'MIM',
+    'EMT',
+    'EME',
+    'SMSE',
+    'MSDE',
+  ];
+
+  const years = [1, 2, 3, 4, 5, 6, 7, 8, 9]; // Years from 1 to 9
+  const courseTypes = ['5', '6']; // Core and elective courses
+  const semesters = [1, 2]; // Odd for first semester, even for second
+
+  const courseCodes: Array<string> = [];
+
+  // Generate course codes
+  programs.forEach((program) => {
+    years.forEach((year) => {
+      courseTypes.forEach((type) => {
+        semesters.forEach((semester) => {
+          const code = `${program} ${year}${type}${semester}`;
+          courseCodes.push(code);
+        });
+      });
+    });
+  });
+
+  return courseCodes;
+}
+
+// const allCourseCodes = generateCourseCodes();
+
+export function generateDepartmentCode() {
+  const departmentCodes = [
+    101, // Agricultural Economics, Agribusiness and Extension
+    102, // Agricultural Engineering
+    103, // Agriculture
+    201, // Architecture
+    301, // Biochemistry and Biotechnology
+    302, // Civil Engineering
+    303, // Computer Engineering
+    304, // Computer Science
+    305, // Construction Technology and Management
+    306, // Crop and Soil Sciences
+    307, // Electrical and Electronic Engineering
+    308, // Environmental Science
+    309, // Food Science and Technology
+    310, // Geography and Rural Development
+    311, // Geomatic Engineering
+    312, // Horticulture
+    313, // Hospitality and Tourism Management
+    314, // Industrial Art
+    315, // Industrial Mathematics
+    316, // Industrial Physics
+    317, // Landscape Design and Management
+    318, // Materials Engineering
+    319, // Mechanical Engineering
+    320, // Meteorology and Climate Science
+    321, // Natural Resources Management
+    322, // Petrochemical Engineering
+    323, // Petroleum Engineering
+    324, // Physics
+    325, // Publishing Studies
+    326, // Renewable Natural Resources
+    327, // Statistics
+    328, // Surveying and Geoinformatics
+    329, // Textile Design and Technology
+    330, // Urban Roads and Transport Engineering
+    331, // Water Resources Engineering
+    401, // Actuarial Science
+    402, // Banking and Finance
+    403, // Business Administration
+    404, // Human Resource Management
+    405, // International Business
+    406, // Logistics and Supply Chain Management
+    407, // Marketing
+    408, // Management Information Systems
+    409, // Entrepreneurship
+    410, // Estate Management
+    411, // Land Economy
+    412, // Quantity Surveying and Construction Economics
+    413, // Real Estate
+    414, // Telecommunication Engineering
+    415, // Chemical Engineering
+    416, // Chemistry
+    417, // Medical Laboratory Technology
+    418, // Nursing
+    419, // Physics
+    420, // Physiology
+    421, // Sports and Exercise Science
+    422, // Biochemistry
+    423, // Chemistry
+    424, // Geological Engineering
+    425, // Geology
+    426, // Mathematics
+    427, // Petrology
+    428, // Petrophysics
+    429, // Petroleum Geoscience
+    430, // Structural Engineering
+    431, // Telecommunications Engineering
+    432, // Textile Engineering
+    433, // Tourism and Hospitality Management
+    434, // Vehicle Engineering
+    435, // Veterinary Medicine
+    436, // Construction Management
+    437, // Finance
+    438, // Human Resource Development
+    439, // Information Technology
+    440, // Management Studies
+    441, // Marketing
+    442, // Supply Chain Management
+    443, // Land Administration
+    444, // Real Estate Management and Finance
+    445, // Agribusiness Management
+    446, // Agribusiness Management and Finance
+    447, // Landscape Architecture
+    448, // Human Settlement Planning
+    449, // Interior Architecture and Furniture Production
+    450, // Textile Design and Technology
+    451, // Fashion Design
+    452, // Industrial Engineering
+    453, // Water Supply and Environmental Sanitation
+    454, // Water and Environmental Engineering
+    455, // Soil and Water Engineering
+    456, // Rural and Community Development
+    457, // Building Technology
+    458, // Agricultural Engineering
+    459, // Agricultural Biotechnology
+    460, // Forestry
+    461, // Fisheries and Aquaculture Technology
+    462, // Wood Science and Technology
+    463, // Renewable Energy Technologies
+    464, // Dairy and Meat Science and Technology
+    465, // Food Quality Management
+    466, // Food Processing Engineering
+    467, // Seed Science and Technology
+    468, // Post Harvest Technology
+    469, // Industrial Mathematics
+    470, // Pure Mathematics
+    471, // Applied Mathematics
+    472, // Computational Mathematics
+    473, // Statistics
+    474, // Actuarial Science
+    475, // Mathematical Sciences
+    476, // Climate Science and Natural Resource Management
+    477, // Resource Enterprise and Entrepreneurship
+    478, // Land Use Planning
+    479, // Social Forestry and Environmental Governance
+    480, // Watershed Management and Ecohydrology
+    481, // Agroforestry and Environment
+    482, // Climate Change Adaptation and Mitigation
+  ];
+
+  return departmentCodes;
 }

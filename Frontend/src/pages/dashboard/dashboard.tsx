@@ -8,14 +8,15 @@ import Modalforms from './ModalForms';
 import { readDir, BaseDirectory } from '@tauri-apps/api/fs';
 import { ScrollArea, Text } from '@mantine/core';
 import useDashboard from './hook/useDashboard';
-import { FileEntry } from '@tauri-apps/api/fs';
-import { Constants } from '../../utils/constants';
+// import { readMetadata } from '../../utils/helper';
 
 const entries = await readDir('visioMark', {
   dir: BaseDirectory.Document,
   recursive: true,
 });
 
+
+// const metadata = await readMetadata({ name_of_file });
 
 
 const Dashboard = () => {
@@ -27,10 +28,7 @@ const Dashboard = () => {
   function findMatches() {
     const matches = recentFiles.map((itemName) => {
       const matchedItems = entries.filter((item) => item.name === itemName);
-      // if (matchedItems.length === 0) {
-      //   const filteredData = recentFiles.filter((item) => item !== itemName);
-      //   localStorage.setItem('recentFileNames', JSON.stringify(filteredData));
-      // }
+  
       return matchedItems;
     });
 
@@ -68,7 +66,7 @@ const Dashboard = () => {
           Welcome back, let’s get started
         </Text>
 
-        {!recentEntries ? (
+        {recentEntries.length === 0 ? (
           <div
             style={{
               paddingTop: '3rem',
@@ -203,12 +201,13 @@ const Dashboard = () => {
                 }}
               >
                 <RFContent>
-                  {Constants.RECENTENTRY.map((entry, index) => (
+                  {recentEntries.map((entry, index) => (
+                    
                     <SharedCard
                       key={index}
                       name_of_file={entry.name}
-                      academic_year={entry.academic_year}
-                      marked_time={entry.marked_time}
+                      academic_year={'2023/2024'}
+                      marked_time={'2 days ago'}
                       entry={entry}
                     />
                   ))}

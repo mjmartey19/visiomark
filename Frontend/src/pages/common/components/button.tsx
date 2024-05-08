@@ -5,12 +5,14 @@ const GenericBtn = ({
   title,
   sx,
   onClick,
+  disabled,
   type,
   tooltip,
 }: {
   title: string;
   sx?: Sx | Sx[];
   onClick?: () => void;
+  disabled?: boolean;
   type: 'submit' | 'button';
   tooltip?: string;
 }) => {
@@ -26,6 +28,7 @@ const GenericBtn = ({
         ]}
         type={type}
         onClick={onClick}
+        disabled={disabled}
       >
         {title}
       </Button>

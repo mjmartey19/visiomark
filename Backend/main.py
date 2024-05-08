@@ -7,7 +7,7 @@ import tensorflow as tf
 import cv2
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-from helpers.utils import save_response_to_csv, a
+from helpers.utils import save_response_to_csv
 
 
 app = FastAPI()
@@ -25,6 +25,7 @@ logging.basicConfig(level=logging.INFO)  # Set the desired log level
 class ImageProcessingModel(pydantic.BaseModel):
     image_dir: str
     no_of_questions: str = '40',
+    course_code: str
     master_key: dict = {}
 
 
@@ -57,7 +58,8 @@ async def predict_score(ipm: ImageProcessingModel):
     if len(image_file_names) == 0:
         raise HTTPException(status_code=status.HTTP_200_SUCCESS, detail= "No images found in the directory.")
     
-    a(response_data=response)
+    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code)
+    print(f"CSV_FILE {csv_file}")
     
-    return response
+    return [ csv_file, response ]
 

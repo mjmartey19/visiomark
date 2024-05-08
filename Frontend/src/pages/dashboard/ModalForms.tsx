@@ -25,8 +25,9 @@ import { schema } from './schema';
 import useDashboard from './hook/useDashboard';
 
 const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
-  const [active, setActive] = useState(0);
-
+  const [active, setActive] = useState<number>(0);
+  const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true); // State to manage next button disable
+  
   const {
     all,
     setAll,
@@ -55,12 +56,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     return <>{divs}</>;
   }
 
-  const nextStep = () =>
-    setActive((current) => (current < 2 ? current + 1 : current));
-  const prevStep = () =>
-    setActive((current) => (current > 0 ? current - 1 : current));
-
-  const form: UseFormReturnType<unknown, (values: unknown) => typeof schema> =
+  const form: UseFormReturnType<any, (values: any) => typeof schema> =
     useUserForm({
       validate: zodResolver(schema),
       initialValues: {
@@ -68,10 +64,34 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
         department_code: '',
         year: '',
         number_of_questions: '',
-        academic_year: '',
-        lecturer_name: '',
       },
     });
+
+    useEffect(() => {
+      // Enable/disable next button based on current step inputs validation
+      const currentStepInputs = getCurrentStepInputs();
+      setIsNextDisabled(!currentStepInputs.every(val => val));
+    }, [active, form.values]);
+  
+    const getCurrentStepInputs = () : (string | undefined)[] => {
+      switch (active) {
+        case 0:
+          return [form.values.course_code, form.values.department_code];
+        case 1:
+          return [form.values.number_of_questions, selectedFolder];
+        default:
+          return [];
+      }
+    };
+  
+    const nextStep = () => {
+      if (!isNextDisabled) {
+        setActive((current) => (current < 2 ? current + 1 : current));
+      }
+    };
+  
+    const prevStep = () =>
+      setActive((current) => (current > 0 ? current - 1 : current));
 
   return (
     <>
@@ -93,13 +113,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
               >
                 <Stepper.Step>
                   <ModalInputs>
-                    <GenericInput
-                      {...form.getInputProps('lecturer_name')}
-                      placeholder="Kojo Nkansah"
-                      val_name="lecturer_name"
-                      label="Name of Lecturer"
-                    />
-
+                   
                     <GenericInput
                       {...form.getInputProps('course_code')}
                       placeholder="COE 343"
@@ -117,23 +131,12 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                 </Stepper.Step>
                 <Stepper.Step>
                   <ModalInputs>
-                    <SelectInput
-                      label="Year"
-                      val_name="year"
-                      placeholder="Select year"
-                      data={Constants.ACADEMIC_LEVELS}
-                    />
-                    <SelectInput
-                      label="Academic year"
-                      val_name="academic_year"
-                      placeholder="Select academic year"
-                      data={Constants.ACADEMIC_YEAR}
-                    />
                     <GenericInput
                       placeholder="40"
                       val_name="number_of_questions"
                       label="Total count of questions"
                     />
+                    
                     <GenericBtn
                       title="Select Folder"
                       onClick={handleFolderSelect}
@@ -245,12 +248,14 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                     title="Next"
                     type="button"
                     onClick={nextStep}
+                    
                     sx={{
                       fontSize: '0.8rem',
                       borderRadius: '20px',
                       padding: '0 3rem',
                       color: '#000000',
                       background: '#fff',
+                      cursor: isNextDisabled ? 'not-allowed' : 'pointer',
 
                       '&:hover': {
                         background: THEME.colors.button.midnight_green,

@@ -4,7 +4,7 @@ import { ScrollArea, Text, Button, Select } from '@mantine/core'; // Added Butto
 import { AllFilesContainer, StyledRefreshIcon, TitleStyles } from './styles';
 import SharedCard from '../common/components/Card/card';
 import { useState, useEffect } from 'react'; // Changed to useEffect
-import { Constants } from '../../utils/constants';
+
 import { THEME } from '../../appTheme';
 import styled from 'styled-components';
 import { sx } from '../common/components/layoutStyles';
@@ -12,128 +12,21 @@ import { sx } from '../common/components/layoutStyles';
 const ITEMS_PER_PAGE = 8; // Number of items to show per page
 
 
-type Entry = {
-  name: string;
-  entry: {
-    path: string;
-    name: string;
-  };
-  academic_year: string;
-  marked_time: string;
-};
-const entries: Entry[] = [
-  {
-    name: 'COE 354_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '2 minutes ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-  {
-    name: 'COE 324_050.csv',
-    entry: {
-      path: '/path/to/file.txt',
-      name: 'file.txt',
-    },
-    academic_year: '2023/2024',
-    marked_time: '1 day ago',
-  },
-];
+const entries = await readDir('visioMark', {
+  dir: BaseDirectory.Document,
+  recursive: true,
+});
+
 
 const AllFiles = () => {
-  const [allFiles, setAllFiles] = useState<Entry[]>(entries);
+  const [allFiles, setAllFiles] = useState<FileEntry[]>(entries);
+
   const [currentPage, setCurrentPage] = useState(1); // State to track current page
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(
     null
   );
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   // Load files when component mounts
-  //   async function loadFiles() {
-  //     const entries = await readDir('visioMark', {
-  //       dir: BaseDirectory.Document,
-  //       recursive: true,
-  //     });
-  //     setAllFiles(entries);
-  //   }
-  //   loadFiles();
-  // }, []); // Empty dependency array to run only once on mount
 
   const handleClick = () => {
     // Refresh the page
@@ -240,8 +133,8 @@ const AllFiles = () => {
                 <SharedCard
                   key={index}
                   name_of_file={entry.name}
-                  academic_year={entry.academic_year}
-                  marked_time={entry.marked_time}
+                  academic_year={'2019/2020'}
+                  marked_time={'3 day ago'}
                   entry={entry}
                 />
               ))}

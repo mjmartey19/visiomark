@@ -9,8 +9,6 @@ export const schema = z.object({
     })
     .min(3, { message: 'Department code must be 3 digits' })
     .max(3),
-  year: z.string().min(3).max(3),
+
   number_of_questions: z.string().max(200),
-  academic_year: z.string().min(3),
-  lecturer_name: z.string().min(3),
 });

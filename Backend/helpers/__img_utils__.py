@@ -60,7 +60,7 @@ def load_diff_images_for_idx_no(image_path: str, width:int, height:int)-> Tuple[
         img = cv2.resize(img, (width, height))
         img = add_brightness(img)
         resized_img = img[260:img.shape[0]//3, 30:img.shape[1]//3]
-        cv2.imshow("idxno_image", resized_img)
+        # cv2.imshow("idxno_image", resized_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         gray_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)

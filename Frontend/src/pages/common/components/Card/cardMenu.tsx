@@ -17,9 +17,8 @@ const SharedCardMenu = ({
   name_of_file,
   entry,
 }: {
-    name_of_file: string | undefined;
-    entry: FileEntry;
-  
+  name_of_file: string | undefined;
+  entry: FileEntry;
 }) => {
   const navigate = useNavigate();
   const openFile = async (path: string) => {

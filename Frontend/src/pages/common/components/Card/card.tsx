@@ -73,6 +73,10 @@ const SharedCard = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '1rem',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '150px'
               }}
             >
               {name_of_file}

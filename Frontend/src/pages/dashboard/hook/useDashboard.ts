@@ -63,6 +63,7 @@ const useDashboard = () => {
           }),
         });
 
+
         if (!response.ok) {
           throw new Error('Network response was not ok.');
         }
@@ -71,11 +72,12 @@ const useDashboard = () => {
 
         if (response.ok) {
           // close();
+          
           storeToLocalStorage(responseData[0]);
           setResponseData(responseData[1]);
           setForPreview(true);
           AppAlert({
-            title: 'Succes',
+            title: 'Success',
             color: `${THEME.colors.button.primary}`,
             message: 'Marked Successfully!! 😁',
           });
