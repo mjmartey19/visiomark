@@ -16,8 +16,6 @@ const entries = await readDir('visioMark', {
 });
 
 
-// const metadata = await readMetadata({ name_of_file });
-
 
 const Dashboard = () => {
   const { getFilenamesFromLocalStorage } = useDashboard();
@@ -111,7 +109,7 @@ const Dashboard = () => {
             </div>
 
             <RequestBtn>
-              <Modalforms open={opened} close={close} />
+              
               <GenericBtn
                 type="button"
                 title="Mark sheets"

@@ -4,6 +4,7 @@ import { ScrollArea, Text, Button, Select } from '@mantine/core'; // Added Butto
 import { AllFilesContainer, StyledRefreshIcon, TitleStyles } from './styles';
 import SharedCard from '../common/components/Card/card';
 import { useState, useEffect } from 'react'; // Changed to useEffect
+import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 
 import { THEME } from '../../appTheme';
 import styled from 'styled-components';
@@ -133,8 +134,6 @@ const AllFiles = () => {
                 <SharedCard
                   key={index}
                   name_of_file={entry.name}
-                  academic_year={'2019/2020'}
-                  marked_time={'3 day ago'}
                   entry={entry}
                 />
               ))}
@@ -150,19 +149,20 @@ const AllFiles = () => {
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <div style={{ display: 'flex' }}>
             <Button
               onClick={prevPage}
               disabled={currentPage === 1}
               style={{
                 fontSize: '0.8rem',
-                fontWeight: 'bolder',
-                color:  currentPage === totalPages ? '#000' : THEME.colors.text.primary,
-                background:
-                  currentPage === 1 ? THEME.colors.background.primary : '#fff',
+                color:  THEME.colors.text.primary,
+                background: currentPage === 1 ? 'transparent' : 'transparent',
               }}
+              sx={{ '&:hover': {
+                border: `1px solid ${THEME.colors.background.primary}`,
+              }}}
             >
-              Previous
+              <MdKeyboardArrowLeft style={{marginRight: '0.4rem'}}/>  Previous
             </Button>
 
             <Button
@@ -170,15 +170,14 @@ const AllFiles = () => {
               disabled={currentPage === totalPages}
               style={{
                 fontSize: '0.8rem',
-                fontWeight: 'bolder',
-                color:  currentPage === totalPages ? THEME.colors.text.primary : '#000',
-                background:
-                  currentPage === totalPages
-                    ? THEME.colors.background.primary
-                    : '#fff',
+                color:  THEME.colors.text.primary,
+                background: currentPage === totalPages ? 'transparent' : 'transparent',
               }}
+              sx={{'&:hover': {
+                border: `1px solid ${THEME.colors.background.primary}`,
+              }}}
             >
-              Next
+                Next <MdKeyboardArrowRight style={{marginLeft: '0.4rem'}}/>
             </Button>
           </div>
           <span

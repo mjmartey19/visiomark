@@ -11,6 +11,7 @@ import { DiGoogleAnalytics } from 'react-icons/di';
 import { GrAnalytics } from 'react-icons/gr';
 import { IoMdAnalytics } from 'react-icons/io';
 import { BsArrowDownLeft, BsArrowDownRight } from 'react-icons/bs';
+import { THEME } from '../../../../appTheme';
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -65,16 +66,27 @@ export function StatsGrid({ data }: StatsGridProps) {
     const DiffIcon = stat.diff > 0 ? BsArrowDownLeft : BsArrowDownRight;
 
     return (
-      <Paper withBorder p="md" radius="md" key={stat.title}>
+      <Paper 
+      // withBorder 
+      p="xl" 
+      radius="md" 
+      key={stat.title}
+      sx={{
+        background: 'transparent',
+        border: `1px solid ${THEME.colors.background.jet}` 
+      }}
+      >
+      
+
         <Group position="apart">
-          <Text size="xs" color="dimmed" className={classes.title}>
+          <Text size="xs" color={THEME.colors.text.primary} className={classes.title}>
             {stat.title}
           </Text>
           <Icon className={classes.icon} size="1.4rem" />
         </Group>
 
         <Group align="flex-end" spacing="xs" mt={25}>
-          <Text className={classes.value}>{stat.value}</Text>
+          <Text className={classes.value} color={THEME.colors.text.primary}>{stat.value} </Text>
           <Text
             color={stat.diff > 0 ? 'teal' : 'red'}
             fz="sm"
@@ -85,10 +97,6 @@ export function StatsGrid({ data }: StatsGridProps) {
             <DiffIcon size="1rem" />
           </Text>
         </Group>
-
-        <Text fz="xs" c="dimmed" mt={7}>
-          Summary on the file
-        </Text>
       </Paper>
     );
   });

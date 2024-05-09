@@ -10,6 +10,7 @@ import {
 } from '@mantine/core';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { SiGoogleanalytics } from 'react-icons/si';
+import { THEME } from '../../../../appTheme';
 
 const useStyles = createStyles((theme) => ({
   progressLabel: {
@@ -82,10 +83,16 @@ export function StatsSegments({ total, diff, data }: StatsSegmentsProps) {
   ));
 
   return (
-    <Paper withBorder p="md" radius="md">
+    <Paper p="md" radius="md"
+       sx={{
+            background: 'transparent',
+            marginTop: '1rem',
+            border: `1px solid ${THEME.colors.background.jet}`
+          }}
+    >
       <Group position="apart">
         <Group align="flex-end" spacing="xs">
-          <Text fz="xl" fw={700}>
+          <Text fz="xl" fw={700} color={THEME.colors.text.primary}>
             {total}
           </Text>
           <Text c="teal" className={classes.diff} fz="sm" fw={700}>

@@ -17,6 +17,12 @@ import SharedCardMenu from './cardMenu';
 import moment from 'moment';
 
 
+type MetadataType = {
+  name_of_file: string;
+  academic_year: string; 
+  createdAt: string; 
+};
+
 const SharedCard = ({
   name_of_file,
   entry,
@@ -25,17 +31,16 @@ const SharedCard = ({
   entry: FileEntry;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [metadata, setMetadata] = useState([]); // State should be an array of strings
+  const [metadata, setMetadata] = useState<MetadataType | null>(null); // State should be an array of strings
 
   const fetchMetaData = async () => {
     try {
-      const data = await getMetadata(name_of_file); // Fetch metadata
-      setMetadata(data); // Update metadata state
-      console.log(name_of_file)
+      const data: MetadataType = await getMetadata(name_of_file); // Fetch metadata
+      setMetadata(data); 
     } catch (error) {
       console.error('Error fetching metadata:', error);
     }
-    console.log(metadata)
+    // console.log(metadata)
   };
 
   useEffect(() => {

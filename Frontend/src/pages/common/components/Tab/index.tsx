@@ -1,4 +1,5 @@
 import { Tabs, TabsProps, rem } from '@mantine/core';
+import { THEME } from '../../../../appTheme';
 
 export function StyledTabs(props: TabsProps) {
   return (
@@ -7,22 +8,18 @@ export function StyledTabs(props: TabsProps) {
       styles={(theme) => ({
         tab: {
           ...theme.fn.focusStyles(),
-          backgroundColor:
-            theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
-          color:
-            theme.colorScheme === 'dark'
-              ? theme.colors.dark[0]
-              : theme.colors.gray[9],
-          border: `${rem(1)} solid ${
-            theme.colorScheme === 'dark'
-              ? theme.colors.dark[6]
-              : theme.colors.gray[4]
-          }`,
+          backgroundColor: 'transparent',
+          border: 'none',
+          borderBottom: `4px solid ${THEME.colors.background.jet}`,
+          color: THEME.colors.background.jet,
           padding: `${theme.spacing.xs} ${theme.spacing.md}`,
           cursor: 'pointer',
           fontSize: theme.fontSizes.sm,
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          marginBottom: '1rem',
 
           '&:disabled': {
             opacity: 0.5,
@@ -33,19 +30,12 @@ export function StyledTabs(props: TabsProps) {
             borderLeft: 0,
           },
 
-          '&:first-of-type': {
-            borderTopLeftRadius: theme.radius.md,
-            borderBottomLeftRadius: theme.radius.md,
-          },
-
-          '&:last-of-type': {
-            borderTopRightRadius: theme.radius.md,
-            borderBottomRightRadius: theme.radius.md,
-          },
+          
 
           '&[data-active]': {
-            backgroundColor: theme.colors.blue[7],
-            borderColor: theme.colors.blue[7],
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderBottom: `4px solid ${theme.white}`,
             color: theme.white,
           },
         },
@@ -58,6 +48,7 @@ export function StyledTabs(props: TabsProps) {
 
         tabsList: {
           display: 'flex',
+          gap: '0.5rem',
         },
       })}
       {...props}

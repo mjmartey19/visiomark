@@ -29,7 +29,7 @@ const useDashboard = () => {
     const getStoredData = getFilenamesFromLocalStorage();
     getStoredData.unshift(fileName);
 
-    const limitToTen = getStoredData.slice(0, 10);
+    const limitToTen = getStoredData.slice(0, 4);
     localStorage.setItem('recentFileNames', JSON.stringify(limitToTen));
 
     return getStoredData;
