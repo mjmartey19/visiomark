@@ -3,6 +3,12 @@ import { appContext } from './Context';
 import { BaseDirectory, readTextFile, removeFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
 
+type MetadataType = {
+  name_of_file: string;
+  academic_year: string; 
+  createdAt: Date; 
+};
+
 export const readCSVFile = async ({
   name_of_file,
 }: {
@@ -35,7 +41,7 @@ console.log(data)
   }
 };
 
-export const getMetadata = async (name_of_file?: string) => {
+export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
@@ -52,24 +58,23 @@ export const getMetadata = async (name_of_file?: string) => {
     metadataCsvData.shift();
 
     // Parse metadata CSV data
-    const metadataData = metadataCsvData.map((row) => {
+    const metadataData: MetadataType[] = metadataCsvData.map((row) => {
       const rowData = row.split(',');
-      const item = {
-        file_name: rowData[0],
+      const item: MetadataType = {
+        name_of_file: rowData[0],
         academic_year: rowData[1],
-        createdAt: rowData[2].trim(),
+        createdAt: new Date(rowData[2].trim()), // Convert to Date object
       };
       return item;
     });
 
     // Find the metadata corresponding to the file name
-    const metadata = metadataData.find((metadataItem) => metadataItem.file_name === name_of_file);
+    const metadata = metadataData.find((metadataItem) => metadataItem.name_of_file === name_of_file);
 
-    console.log(metadata)
-    return metadata;
+    return metadata || null; // Return null if metadata is not found
   } catch (error) {
     console.log(error);
-    return;
+    return null;
   }
 };
 

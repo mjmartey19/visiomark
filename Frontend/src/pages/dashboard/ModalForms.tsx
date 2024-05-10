@@ -177,7 +177,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                     }}
                   >
                     <KeyheadStyles>Select the correct answers</KeyheadStyles>
-                    <div
+                    <Group
                       style={{
                         display: 'flex',
                         justifyContent: 'center',
@@ -210,7 +210,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       >
                         Bonus
                       </Text>
-                    </div>
+                    </Group>
                   </div>
 
                   <DisplayDivMultipleTimes />

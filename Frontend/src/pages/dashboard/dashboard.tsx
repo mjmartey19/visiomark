@@ -192,7 +192,7 @@ const Dashboard = () => {
               >
                 RECENT FILES
               </Text>
-              <ScrollArea
+              <div
                 style={{
                   height: '27vh',
                   padding: '10px 15px 10px 0',
@@ -208,7 +208,7 @@ const Dashboard = () => {
                     />
                   ))}
                 </RFContent>
-              </ScrollArea>
+              </div>
             </RecentFiles>
           </div>
         )}

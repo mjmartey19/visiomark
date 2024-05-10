@@ -20,7 +20,7 @@ import moment from 'moment';
 type MetadataType = {
   name_of_file: string;
   academic_year: string; 
-  createdAt: string; 
+  createdAt: Date; 
 };
 
 const SharedCard = ({
@@ -31,11 +31,16 @@ const SharedCard = ({
   entry: FileEntry;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [metadata, setMetadata] = useState<MetadataType | null>(null); // State should be an array of strings
+  const [metadata, setMetadata] = useState<MetadataType | null>(null);
+
+
+  const handleMenuClick = () => {
+    setIsHovered(false); // Reset hover state
+  };
 
   const fetchMetaData = async () => {
     try {
-      const data: MetadataType = await getMetadata(name_of_file); // Fetch metadata
+      const data = await getMetadata(name_of_file); // Fetch metadata
       setMetadata(data); 
     } catch (error) {
       console.error('Error fetching metadata:', error);
@@ -135,7 +140,7 @@ const SharedCard = ({
           <BsThreeDotsVertical color="#fff" />
         </div>
       </Card>
-      {isHovered && <SharedCardMenu name_of_file={entry.name} entry={entry} />}
+      {isHovered && <SharedCardMenu name_of_file={entry.name} entry={entry} onMenuClick={handleMenuClick} />}
     </div>
   );
 };

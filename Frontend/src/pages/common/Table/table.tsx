@@ -22,6 +22,7 @@ import { THEME } from '../../../appTheme';
 import { FaEye } from "react-icons/fa6";
 import { useDisclosure } from '@mantine/hooks';
 import ModalComp from '../Modal/Modal';
+import ModalPreview from '../../file-preview/ModalPreview';
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -148,6 +149,7 @@ function GenericTable({ data }: TableSortProps) {
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState<keyof ITableDataProps | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const setSorting = (field: keyof ITableDataProps) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -164,38 +166,40 @@ function GenericTable({ data }: TableSortProps) {
     );
   };
 
-  const handlePreview = (file_name: string) => {
-    
-  }
 
-  const rows = sortedData.map((row) => {
-    const [opened, { open, close }] = useDisclosure(false);
-    return (
-      <tr key={row.file_name}>
-        <td>{row['index number']}</td>
-        <PreictionDataRow>{row.predictions}</PreictionDataRow>
-        <td style={{
-          paddingLeft:'4rem'
-        }}><Text style={{
-          background: THEME.colors.background.jet, 
-          padding: '0.4rem', 
+
+const [rowOpenState, setRowOpenState] = useState<{ [key: string]: boolean }>({});
+
+const handlePreview = (fileName: string) => {
+  setRowOpenState(prevState => ({
+    ...prevState,
+    [fileName]: !prevState[fileName]
+  }));
+};
+
+const rows = sortedData.map((row) => {
+  return (
+    <tr key={row.file_name}>
+      <td>{row['index number']}</td>
+      <PreictionDataRow>{row.predictions}</PreictionDataRow>
+      <td style={{ paddingLeft: '4rem' }}>
+        <Text style={{
+          background: THEME.colors.background.jet,
+          padding: '0.4rem',
           width: '6rem',
           textAlign: 'center',
           borderRadius: '4rem'
-          }}>
-            {row.score}
-            </Text>
-        </td>
-        <td style={{
-          paddingLeft:'7rem'
-        }} >
-            <ModalPreview open={opened} close={close} />
-            Good Morning
-          </ModalPreview>
-          <FaEye size={20} style={{cursor: 'pointer'}} color={THEME.colors.text.primary} onClick={open} /></td>
-      </tr>
-    );
-  });
+        }}>
+          {row.score}
+        </Text>
+      </td>
+      <td style={{ paddingLeft: '7rem' }} >
+        <ModalPreview open={rowOpenState[row.file_name] || false} close={() => handlePreview(row.file_name)} data={row}/>
+        <FaEye size={20} style={{ cursor: 'pointer' }} color={THEME.colors.text.primary} onClick={() => handlePreview(row.file_name)} />
+      </td>
+    </tr>
+  );
+});
 
   return (
     <ScrollArea
@@ -211,10 +215,11 @@ function GenericTable({ data }: TableSortProps) {
        }} 
       >
         <Text
-        style={{
-          color: THEME.colors.text.primary
-        }}
-        >
+            sx={{ fontFamily: 'Greycliff CF, sans-serif', color: `${THEME.colors.text.primary}` }}
+            ta="left"
+            fz="1rem"
+            fw={700}
+          >
            COE 354
         </Text>
       <TextInput

@@ -32,7 +32,7 @@ export function StyledTabs(props: TabsProps) {
 
           
 
-          '&[data-active]': {
+          '&[data-active="true"]': {
             backgroundColor: 'transparent',
             border: 'none',
             borderBottom: `4px solid ${theme.white}`,

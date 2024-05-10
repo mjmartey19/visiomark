@@ -21,6 +21,7 @@ const entries = await readDir('visioMark', {
 
 const AllFiles = () => {
   const [allFiles, setAllFiles] = useState<FileEntry[]>(entries);
+  
 
   const [currentPage, setCurrentPage] = useState(1); // State to track current page
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
@@ -62,8 +63,8 @@ const AllFiles = () => {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem',
-          padding: '10px 0',
+          // gap: '1rem',
+          padding: '10px 0 0 0',
           height: 'calc(100% - 70px)',
         }}
       >
@@ -79,7 +80,7 @@ const AllFiles = () => {
           </Text>
           <StyledRefreshIcon size={20} onClick={handleClick} />
         </TitleStyles>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1}}>
           <div
             style={{
               padding: '10px 15px 10px 0',
@@ -144,7 +145,7 @@ const AllFiles = () => {
         <div
           style={{
             display: 'flex',
-            width: '90%',
+            width: '100%',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
@@ -182,7 +183,6 @@ const AllFiles = () => {
           </div>
           <span
             style={{
-              margin: '0 0.6rem',
               color: THEME.colors.text.primary,
               fontSize: '0.8rem',
             }}

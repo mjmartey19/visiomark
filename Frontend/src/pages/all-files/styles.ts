@@ -5,6 +5,7 @@ export const AllFilesContainer = styled.div`
 display: flex;
 flex-wrap:wrap;
 gap: 1.5rem;
+height: 21rem;
 `
 
 export const TitleStyles = styled.div`

@@ -1,7 +1,7 @@
 import { Card, Text, Tooltip } from '@mantine/core';
 import { THEME } from '../../../../appTheme';
 import { FileEntry } from '@tauri-apps/api/fs';
-import { open } from '@tauri-apps/api/shell';
+import { open as openShell } from '@tauri-apps/api/shell';
 import { FiFileText } from 'react-icons/fi';
 import { BiLinkExternal, BiTrash } from 'react-icons/bi';
 import { VscPreview } from 'react-icons/vsc';
@@ -19,13 +19,15 @@ import GenericBtn from '../button';
 const SharedCardMenu = ({
   name_of_file,
   entry,
+  onMenuClick,
 }: {
   name_of_file: string | undefined;
   entry: FileEntry;
+  onMenuClick: () => void;
 }) => {
   const navigate = useNavigate();
   const openFile = async (path: string) => {
-    await open(path);
+    await openShell(path);
   };
   const { setResponseData } = useContext(appContext);
   const [opened, { open, close }] = useDisclosure(false);
@@ -36,6 +38,11 @@ const SharedCardMenu = ({
     setResponseData(data);
     navigate(`${Constants.PATHS.preview}`, { state: data });
   };
+
+  // function handleDelete(){
+  //    open()
+  //    onMenuClick()
+  // }
 
   return (
     <div
@@ -125,7 +132,7 @@ const SharedCardMenu = ({
                     <GenericBtn
                       title="Cancel"
                       type="button"
-                      onClick={close}
+                      onClick={()=>{close(); onMenuClick()}}
                       sx={{
                         fontSize: '0.8rem',
                         height: '3rem',
@@ -158,7 +165,9 @@ const SharedCardMenu = ({
                 size={20}
                 color="#fff"
                 style={{ cursor: 'pointer' }}
-                onClick={open}
+                onClick={() => {
+                  open();
+                }}
               />
             </IconContainer>
           </Tooltip>
