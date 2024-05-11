@@ -1,4 +1,4 @@
-import { Flex, Group, TextInput, Checkbox } from '@mantine/core';
+import { Flex, Group, TextInput, Checkbox, rem } from '@mantine/core';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { THEME } from '../../appTheme';
@@ -18,21 +18,29 @@ const MasterKeyPage = ({
 
   return (
     <Flex
-      gap={'sm'}
-      justify="flex-start"
-      align="flex-start"
-      direction="row"
-      wrap="wrap"
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    gap={'xl'}
+    justify="flex-start"
+    align="flex-start"
+    direction="row"
+    wrap="wrap"
+    style={{
+      display: 'flex',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}
+  >
       <QuestionNumberStyles>{question_number}. </QuestionNumberStyles>
       <Group spacing={'xl'}>
+      <div
+          style={{
+            background: `${THEME.colors.background.primary}`,
+            padding: '4px',
+            borderRadius: '50px',
+            display: 'flex',
+          }}
+        >
       <ChoiceStyles
           clicked={all[question_number] === 'A'}
           onClick={() => {
@@ -78,8 +86,10 @@ const MasterKeyPage = ({
         >
           E
         </ChoiceStyles>
-
-        <TextInput
+        </div>
+      </Group>
+      <Group spacing='xl' style={{paddingLeft: '2rem'}}>
+      <TextInput
           type="number"
           maxLength={1}
           value={1}
@@ -129,15 +139,16 @@ const ChoiceStyles = styled.div<{
   question_number?: number;
   onClick?: () => void;
 }>`
-  background: ${({ clicked }) =>
-    clicked ? THEME.colors.button.primary : THEME.colors.button.midnight_green};
-  width: 3rem;
+  background: ${({ clicked, index, question_number }) =>
+    clicked ? THEME.colors.background.black : ''};
+  width: 5rem;
   height: 3rem;
   display: flex;
-  border-radius: 50%;
+  border-radius: 100px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  color: #fff;
 `;
 
 const QuestionNumberStyles = styled.p`

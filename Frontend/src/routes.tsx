@@ -5,9 +5,14 @@ import SignUp from './pages/auth-pages/sign-up';
 import Dashboard from './pages/dashboard/dashboard';
 import AllFiles from './pages/all-files/AllFiles';
 import Settings from './pages/settings/Settings';
-import SignIn from './pages/auth-pages/sign-in';
+import SignIn from './pages/auth-pages/desktop-sign-in';
+import BrowserLogin from './pages/auth-pages/browser-sign-in';
 import Preview from './pages/file-preview';
 import Statistics from './pages/file-preview/analytics/statistics';
+import BrowserSignup from './pages/auth-pages/browser-sign-up';
+import GoBrowser from './pages/auth-pages/go-to-browser';
+import OpenDesktop from './pages/auth-pages/open-desktop';
+import ConnectionError from './pages/auth-pages/connection-error';
 
 const ROUTE = Constants.PATHS;
 
@@ -34,8 +39,30 @@ const routing = createBrowserRouter([
   },
   {
     path: ROUTE.signIn,
-    element: <SignIn />,
+    element: <SignIn/>,
   },
+  {
+    path: ROUTE.browserLogin,
+    element: <BrowserLogin />,
+  },
+  {
+    path: ROUTE.browserSignup,
+    element: <BrowserSignup />,
+  },
+  {
+    path: ROUTE.goBrowser,
+    element: <GoBrowser />,
+  },
+  {
+    path: ROUTE.openDesktop,
+    element: <OpenDesktop />,
+  },
+  {
+    path: ROUTE.connectionError,
+    element: <ConnectionError />,
+  },
+  
+
   {
     path: ROUTE.preview,
     element: <Preview />,

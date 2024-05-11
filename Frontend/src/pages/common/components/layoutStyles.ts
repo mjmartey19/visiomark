@@ -53,7 +53,7 @@ export const TopbarContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   background-color:  ${THEME.colors.background.black};
-  border-bottom: 1px solid white
+  border-bottom: 1px solid ${THEME.colors.background.jet}
 `;
 
 export const MainContainer = styled.div`

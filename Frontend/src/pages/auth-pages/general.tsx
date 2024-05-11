@@ -1,23 +1,21 @@
+import { THEME } from '../../appTheme';
+import { LogoWrapper } from '../common/components/layoutStyles';
 import {
-  LeftContainer,
-  LogoContainer,
-  MainContainer,
-  RightContainer,
   Title,
+  TopbarContainer,
 } from './styles';
 
 const General = ({ children }: { children: React.ReactNode }) => {
   return (
-    <MainContainer>
-      <LeftContainer>
-        <LogoContainer>
+    <div style={{height: '100vh', background: `${THEME.colors.background.black}`}}>
+      <TopbarContainer>
+        <LogoWrapper>
+          <img src="/src/assets/logo.svg" width={30} alt="logo" />
           <Title>VisioMark</Title>
-        </LogoContainer>
-        <img src="/src/assets/logo.svg" alt="" width={500} />
-      </LeftContainer>
-
-      <RightContainer>{children}</RightContainer>
-    </MainContainer>
+        </LogoWrapper>
+      </TopbarContainer>
+      {children}
+    </div>
   );
 };
 

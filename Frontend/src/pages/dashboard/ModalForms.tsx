@@ -68,10 +68,10 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     });
 
     useEffect(() => {
-      // Enable/disable next button based on current step inputs validation
       const currentStepInputs = getCurrentStepInputs();
       setIsNextDisabled(!currentStepInputs.every(val => val));
-    }, [active, form.values]);
+    }, [active, form.values, selectedFolder]); 
+    
   
     const getCurrentStepInputs = () : (string | undefined)[] => {
       switch (active) {
@@ -98,7 +98,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
       <ModalComp opened={open} close={close}>
         {mutate.isLoading ? (
           <LoaderWrapper>
-            <Loader />
+           <Loader size="70" color="#fff" type="bars" />
             <p>Good things take time!!</p>
           </LoaderWrapper>
         ) : (
@@ -195,7 +195,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                         fz="0.8rem"
                         fw={500}
                       >
-                        Mark(S)
+                        Mark(s)
                       </Text>
                       <Text
                         c={THEME.colors.text.primary}

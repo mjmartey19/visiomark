@@ -1,29 +1,36 @@
 import styled from '@emotion/styled';
 import { TextInput } from '@mantine/core';
+import { THEME } from '../../appTheme';
+
+export const TopbarContainer = styled.div`
+  display: flex;
+  padding: 0 1rem;
+  justify-content: space-between;
+  align-items: center;
+  background-color:  ${THEME.colors.background.black};
+  border-bottom: 1px solid ${THEME.colors.background.jet}
+`;
 
 export const MainContainer = styled.div`
   display: flex;
-  padding: 2rem 40px;
-  justify-content: space-between;
-`;
+  justify-content: center;
+  height: calc(100vh - 5rem);
+  align-Items: center;
+`
 
-export const LeftContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-  gap: 3rem;
-`;
+export const H2 = styled.h2`
+  font-family: poppins;
+  text-align: center;
+  line-height: 2rem;
+  fo
+`
 
 export const LogoContainer = styled.div``;
 
-export const Title = styled.h1`
-  font-family: Rubik;
+export const Title = styled.p`
+  font-family: Poppins;
 `;
 
-export const RightContainer = styled.div`
-  padding: 6rem 0;
-  width: 50%;
-`;
 
 export const FormTitle = styled.div``;
 
