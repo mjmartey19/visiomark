@@ -1,22 +1,37 @@
 import ModalFull from '../common/Modal/ModalFull';
-import { useEffect, useState } from 'react';
-
-import {
-  Group,
-  Text,
-} from '@mantine/core';
+import { useEffect, useState, useRef } from 'react';
+import { Text, Input } from '@mantine/core';
 import { THEME } from '../../appTheme';
 import GenericBtn from '../common/components/button';
 import { ITableDataProps } from '../common/Table/types';
 
-// Define props types
+
 interface ModalPreviewProps {
   open: boolean;
   close: () => void;
   data: ITableDataProps;
 }
 
-const AnswerCard = ({ answer, color, number }: { answer: string; color: string; number: number }) => {
+const AnswerCard = ({
+  answer,
+  color,
+  number,
+  isEditing,
+
+}: {
+  answer: string;
+  color: string;
+  number: number;
+  isEditing: boolean;
+}) => {
+  const [editAnswer, setEditAnswer] = useState(answer);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditAnswer(e.target.value);
+  };
+
+
+
   return (
     <div style={{ display: 'inline-block', width: '10%', margin: '5px' }}>
       <div
@@ -25,38 +40,66 @@ const AnswerCard = ({ answer, color, number }: { answer: string; color: string; 
           padding: '10px',
           textAlign: 'center',
           borderRadius: '5px',
+          position: 'relative',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}
       >
-        <span style={{fontSize:'0.9rem', color:`${THEME.colors.background.primary}`}}>{`${number}. `}</span>
-        {answer}
+        <span style={{ fontSize: '0.9rem', color: `${THEME.colors.background.primary}` }}>{`${number}. `}</span>
+        {isEditing ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Input value={editAnswer} onChange={handleChange} style={{width: '35px'}}/>
+          </div>
+        ) : (
+          answer
+        )}
       </div>
     </div>
   );
 };
 
-const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data}) => {
+const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data }) => {
   const [page, setPage] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(100);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [startY, setStartY] = useState<number>(0);
+  const [draggedY, setDraggedY] = useState<number>(0);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedAnswers, setEditedAnswers] = useState<string[]>([]);
 
-  const answersPerPage = 56;
+  const answersPerPage = !isEditing ? 56 : 48;
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
 
-  // Function to generate a random answer ('A', 'B', 'C', or 'D')
-  function generateRandomAnswer(): string {
-    const answers: string[] = ['A', 'B', 'C', 'D', 'E'];
-    const randomIndex: number = Math.floor(Math.random() * answers.length);
-    return answers[randomIndex];
-  }
+  useEffect(() => {
+    const markingScheme: string[] = generateMarkingScheme();
+    const studentAnswers: string[] = generateStudentAnswers();
+    const comparisonResult = compareAnswers(studentAnswers, markingScheme);
+    setResult(comparisonResult);
+  }, []);
 
-  // Function to generate a marking scheme of 100 answers
-  function generateMarkingScheme(): string[] {
+  const generateMarkingScheme = (): string[] => {
     const markingScheme: string[] = [];
     for (let i: number = 0; i < 100; i++) {
       markingScheme.push(generateRandomAnswer());
     }
     return markingScheme;
-  }
+  };
 
-  // Function to compare student's answers with marking scheme and assign colors
-  function compareAnswers(studentAnswers: string[], markingScheme: string[]): { answer: string; color: string }[] {
+  const generateRandomAnswer = (): string => {
+    const answers: string[] = ['A', 'B', 'C', 'D', 'E'];
+    const randomIndex: number = Math.floor(Math.random() * answers.length);
+    return answers[randomIndex];
+  };
+
+  const generateStudentAnswers = (): string[] => {
+    const studentAnswers: string[] = [];
+    for (let i: number = 0; i < 100; i++) {
+      studentAnswers.push(generateRandomAnswer());
+    }
+    return studentAnswers;
+  };
+
+  const compareAnswers = (studentAnswers: string[], markingScheme: string[]): { answer: string; color: string }[] => {
     const result: { answer: string; color: string }[] = [];
     for (let i: number = 0; i < studentAnswers.length; i++) {
       if (studentAnswers[i] === markingScheme[i]) {
@@ -66,24 +109,48 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data}) => {
       }
     }
     return result;
-  }
-  
-  // Generate marking scheme
-  const markingScheme: string[] = generateMarkingScheme();
+  };
 
-  // Example student's answers (replace with actual student's answers)
-  const studentAnswers: string[] = [];
-  for (let i: number = 0; i < 100; i++) {
-    studentAnswers.push(generateRandomAnswer());
-  }
-
-  // Compare student's answers with marking scheme
-  const result: { answer: string; color: string }[] = compareAnswers(studentAnswers, markingScheme);
-
-  // Function to slice answers based on current page
   const slicedResult = result.slice((page - 1) * answersPerPage, page * answersPerPage);
 
   const totalPages = Math.ceil(result.length / answersPerPage);
+
+  const handleZoomIn = () => {
+    setZoom((prevZoom) => prevZoom + 10); // Increase zoom by 10%
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prevZoom) => Math.max(10, prevZoom - 10)); // Decrease zoom by 10%, but not less than 10%
+  };
+
+  const handleReset = () => {
+    setZoom(100);
+    setStartY(0);
+    setDraggedY(0);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    setIsDragging(true);
+    setStartY(e.clientY);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    if (isDragging) {
+      const deltaY = e.clientY - startY;
+      setDraggedY(deltaY);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setStartY(0);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    setStartY(0);
+  };
+
   const nextStep = () => {
     if (page < totalPages) {
       setPage((prevPage) => prevPage + 1);
@@ -96,15 +163,86 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data}) => {
     }
   };
 
+  const handleEdit = () => {
+    setIsEditing(!isEditing);
+    // If switching to edit mode, store the original answers
+    if (!isEditing) {
+      setEditedAnswers([...slicedResult.map((ans) => ans.answer)]);
+    }
+  };
+
+  const handleEditSave = (index: number, newAnswer: string) => {
+    const updatedAnswers = [...editedAnswers];
+    updatedAnswers[index] = newAnswer;
+    setEditedAnswers(updatedAnswers);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+    setEditedAnswers([]);
+  };
+
+  const handleUpdate = () => {
+    // Update the answers in the result
+    const updatedResult = [...result];
+    for (let i = 0; i < editedAnswers.length; i++) {
+      updatedResult[(page - 1) * answersPerPage + i].answer = editedAnswers[i];
+    }
+    setResult(updatedResult);
+    // Exit edit mode
+    setIsEditing(false);
+  };
+
+
   return (
     <>
       <ModalFull opened={open} close={close}>
         <div style={{ display: 'flex', gap: '5rem', padding: '2rem 2rem 0 4rem' }}>
-          <div style={{ padding: '2rem', background: THEME.colors.background.jet, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <img src="/src/assets/scan01.jpg" style={{ width: '23rem' }} alt="logo" />
+          <div
+            style={{
+              padding: '2rem',
+              background: THEME.colors.background.jet,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              position: 'relative',
+              cursor: isDragging ? 'grabbing' : 'grab',
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+          >
+            <img
+              ref={imageRef}
+              src="/src/assets/scan01.jpg"
+              style={{
+                width: '23rem',
+                transform: `scale(${zoom / 100}) translateY(${draggedY}px)`,
+                transition: 'transform 0.3s ease-in-out',
+                userSelect: 'none',
+              }}
+              alt="logo"
+              onWheel={(e) => {
+                if (e.deltaY < 0) {
+                  handleZoomIn();
+                } else {
+                  handleZoomOut();
+                }
+              }}
+            />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+              <button onClick={handleZoomIn}>+</button>
+              <button onClick={handleZoomOut}>-</button>
+              <button onClick={handleReset}>
+                <span role="img" aria-label="Reset Zoom">
+                  ↻
+                </span>
+              </button>
+            </div>
           </div>
-          <div style={{display: 'flex', flexDirection: 'column', gap:'2rem', width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight:'4rem', fontSize:'1.2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '4rem', fontSize: '1.2rem' }}>
               <div style={{ display: 'flex', gap: '5px' }}>
                 <Text>Index number:</Text>
                 <Text color={THEME.colors.text.primary}>{data['index number']}</Text>
@@ -114,55 +252,78 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data}) => {
                 <Text color={THEME.colors.text.primary}>{data.score}</Text>
               </div>
             </div>
-            <div style={{height: '25rem'}}>
+            <div style={{ height: '25rem' }}>
               {slicedResult.map((answer, index) => (
-                <AnswerCard key={index} answer={answer.answer} color={answer.color} number={index + 1 + (page - 1) * answersPerPage} />
+                <AnswerCard
+                  key={index}
+                  answer={answer.answer}
+                  color={answer.color}
+                  number={index + 1 + (page - 1) * answersPerPage}
+                  isEditing={isEditing}
+                />
               ))}
             </div>
             <div>
-              <div style={{ display: 'flex', gap:'0.5rem', justifyContent: 'flex-end', padding: '0 4rem 3rem 0' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', padding: '0 4rem 3rem 0' }}>
                 <GenericBtn
-                  title="Back"
+                  title={isEditing ? 'Update' : 'Edit'}
                   type="button"
-                  disabled={page === 1}
-                  onClick={prevStep}
+                  onClick={handleEdit}
                   sx={{
                     fontSize: '0.8rem',
                     borderRadius: '20px',
                     padding: '0 3rem',
-                    color:`${THEME.colors.background.jet }`,
-                    background:  '#fff',
+                    color: `${THEME.colors.background.jet}`,
+                    background: '#fff',
                     '&:hover': {
                       background: THEME.colors.text.primary,
                     },
-                    '&:disabled': {
-                      background: THEME.colors.background.jet, 
-                      color: '#fff', 
-                    },
                   }}
                 />
+       
+                    <GenericBtn
+                      title="Back"
+                      type="button"
+                      disabled={page === 1}
+                      onClick={prevStep}
+                      sx={{
+                        fontSize: '0.8rem',
+                        borderRadius: '20px',
+                        padding: '0 3rem',
+                        color: `${THEME.colors.background.jet}`,
+                        background: '#fff',
+                        '&:hover': {
+                          background: THEME.colors.text.primary,
+                        },
+                        '&:disabled': {
+                          background: THEME.colors.background.jet,
+                          color: '#fff',
+                        },
+                      }}
+                    />
 
-                  <GenericBtn
-                    title="Next"
-                    type="button"
-                    disabled={page === totalPages}
-                    onClick={nextStep}
-                    sx={{
-                      fontSize: '0.8rem',
-                      borderRadius: '20px',
-                      padding: '0 3rem',
-                      color:`${THEME.colors.background.jet }`,
-                      background:  '#fff',
-                      '&:hover': {
-                        background: THEME.colors.text.primary,
-                      },
-                      '&:disabled': {
-                        background: THEME.colors.background.jet, 
-                        color: '#fff', 
-                      },
-                    }}
-                  />
-         
+                    <GenericBtn
+                      title="Next"
+                      type="button"
+                      disabled={page === totalPages}
+                      onClick={nextStep}
+                      sx={{
+                        fontSize: '0.8rem',
+                        borderRadius: '20px',
+                        padding: '0 3rem',
+                        color: `${THEME.colors.background.jet}`,
+                        background: '#fff',
+                        '&:hover': {
+                          background: THEME.colors.text.primary,
+                        },
+                        '&:disabled': {
+                          background: THEME.colors.background.jet,
+                          color: '#fff',
+                        },
+                      }}
+                    />
+                  
+                
               </div>
             </div>
           </div>
