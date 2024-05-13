@@ -26,6 +26,9 @@ class ImageProcessingModel(pydantic.BaseModel):
     image_dir: str
     no_of_questions: str = '40',
     course_code: str
+    department_code: str
+
+    
     master_key: dict = {}
 
 
@@ -37,7 +40,7 @@ def read_root():
 @app.post("/predict")
 async def predict_score(ipm: ImageProcessingModel):
     # image_corruption_check(ipm.image_dir)
-    print(ipm.image_dir)
+    print(ipm.image_dir, ipm.no_of_questions, ipm.course_code, ipm.department_code)
     
      # Validate the directory path
     if not os.path.isdir(ipm.image_dir):
@@ -58,7 +61,7 @@ async def predict_score(ipm: ImageProcessingModel):
     if len(image_file_names) == 0:
         raise HTTPException(status_code=status.HTTP_200_SUCCESS, detail= "No images found in the directory.")
     
-    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code)
+    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code, department_code=ipm.department_code)
     print(f"CSV_FILE {csv_file}")
     
     return [ csv_file, response ]

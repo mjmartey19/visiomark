@@ -10,7 +10,7 @@ import { ScrollArea, Text } from '@mantine/core';
 import useDashboard from './hook/useDashboard';
 // import { readMetadata } from '../../utils/helper';
 
-const entries = await readDir('visioMark', {
+const entries = await readDir('visioMark\\result', {
   dir: BaseDirectory.Document,
   recursive: true,
 });
@@ -109,7 +109,7 @@ const Dashboard = () => {
             </div>
 
             <RequestBtn>
-              
+            <Modalforms open={opened} close={close} />
               <GenericBtn
                 type="button"
                 title="Mark sheets"

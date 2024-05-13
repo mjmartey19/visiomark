@@ -9,6 +9,7 @@ import { THEME } from '../../../appTheme';
 import { schema } from '../schema';
 import { z } from 'zod';
 import { dialog } from '@tauri-apps/api';
+import { getFilenamesFromLocalStorage, storeToLocalStorage } from '../../../utils/helper';
 
 const useDashboard = () => {
   const [all, setAll] = useState<{ [key: number]: string }>({});
@@ -17,23 +18,6 @@ const useDashboard = () => {
   const folderPath = selectedFolder.toString().replace(/\\/g, '/');
   const navigate = useNavigate();
   const { setResponseData, setForPreview } = useContext(appContext);
-
-  const getFilenamesFromLocalStorage = () => {
-    const getStoredDataAsString = localStorage.getItem('recentFileNames');
-    const getStoredData: Array<string> = getStoredDataAsString
-      ? JSON.parse(getStoredDataAsString)
-      : [];
-    return getStoredData;
-  };
-  const storeToLocalStorage = (fileName: string) => {
-    const getStoredData = getFilenamesFromLocalStorage();
-    getStoredData.unshift(fileName);
-
-    const limitToTen = getStoredData.slice(0, 4);
-    localStorage.setItem('recentFileNames', JSON.stringify(limitToTen));
-
-    return getStoredData;
-  };
 
   const handleFolderSelect = async () => {
     const result = await dialog.open({
@@ -59,6 +43,7 @@ const useDashboard = () => {
             image_dir: folderPath,
             no_of_questions: data['number_of_questions'],
             course_code: data['course_code'],
+            department_code: data['department_code'],
             master_key: { ...all },
           }),
         });
@@ -78,7 +63,7 @@ const useDashboard = () => {
           setForPreview(true);
           AppAlert({
             title: 'Success',
-            color: `${THEME.colors.button.primary}`,
+            color: `${THEME.colors.background.primary}`,
             message: 'Marked Successfully!! 😁',
           });
           window.location.reload();

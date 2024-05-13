@@ -1,0 +1,1 @@
+1. Immediateky create visiomark folder, inside it create result folder when application is first launched 

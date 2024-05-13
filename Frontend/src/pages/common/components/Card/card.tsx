@@ -20,6 +20,8 @@ import moment from 'moment';
 type MetadataType = {
   name_of_file: string;
   academic_year: string; 
+  course_code: string;
+  department_code: string
   createdAt: Date; 
 };
 
@@ -45,7 +47,7 @@ const SharedCard = ({
     } catch (error) {
       console.error('Error fetching metadata:', error);
     }
-    // console.log(metadata)
+
   };
 
   useEffect(() => {

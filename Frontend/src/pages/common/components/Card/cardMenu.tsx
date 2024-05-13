@@ -8,7 +8,7 @@ import { VscPreview } from 'react-icons/vsc';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Constants } from '../../../../utils/constants';
-import { readCSVFile } from '../../../../utils/helper';
+import { readCSVFile, deleteCSVFile } from '../../../../utils/helper';
 import { useContext, useState } from 'react';
 import { appContext } from '../../../../utils/Context';
 import { LuShare } from 'react-icons/lu';
@@ -174,7 +174,7 @@ const SharedCardMenu = ({
                     }}
                   >
                     This will delete{' '}
-                    <span style={{ color: 'red' }}>COE 345 File</span>
+                    <span style={{ color: 'red' }}>{name_of_file} File</span>
                   </Text>
                   <div style={{
                     display: 'flex',
@@ -202,7 +202,9 @@ const SharedCardMenu = ({
                     <GenericBtn
                       title="Delete"
                       type="button"
-                      // onClick={}
+                      onClick={() => {
+                        deleteCSVFile(name_of_file);
+                      }}
                       sx={{
                         fontSize: '0.8rem',
                         borderRadius: '20px',

@@ -1,41 +1,77 @@
 import { BaseDirectory, FileEntry, readDir } from '@tauri-apps/api/fs';
 import Layout from '../common/components/Layout';
-import { ScrollArea, Text, Button, Select } from '@mantine/core'; // Added Button for pagination
+import { Text, Button, Select } from '@mantine/core'; 
 import { AllFilesContainer, StyledRefreshIcon, TitleStyles } from './styles';
 import SharedCard from '../common/components/Card/card';
-import { useState, useEffect } from 'react'; // Changed to useEffect
+import { useState, useEffect } from 'react'; 
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
-
+import { generateDepartmentCode, getMetadata } from '../../utils/helper';
 import { THEME } from '../../appTheme';
 import styled from 'styled-components';
 import { sx } from '../common/components/layoutStyles';
+import { generateCourseCodes, generateAcademicYears } from '../../utils/helper';
 
 const ITEMS_PER_PAGE = 8; // Number of items to show per page
 
 
-const entries = await readDir('visioMark', {
-  dir: BaseDirectory.Document,
-  recursive: true,
-});
-
 
 const AllFiles = () => {
-  const [allFiles, setAllFiles] = useState<FileEntry[]>(entries);
-  
-
-  const [currentPage, setCurrentPage] = useState(1); // State to track current page
+  const [allFiles, setAllFiles] = useState<FileEntry[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<FileEntry[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
-  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(
-    null
-  );
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const entries = await readDir('visioMark\\result', {
+        dir: BaseDirectory.Document,
+        recursive: true,
+      });
+      setAllFiles(entries.filter(entry => entry.name !== 'metadata.csv'));
+    };
+
+    fetchFiles();
+  }, []);
+  
+  useEffect(() => {
+    const filterFiles = async () => {
+      let filtered: (FileEntry | null)[] = [...allFiles];
+  
+      if (selectedCourse || selectedDepartment || selectedYear) {
+        filtered = await Promise.all(
+          allFiles.map(async (entry) => {
+            const metadata = await getMetadata(entry.name);
+            if (!metadata) return null;
+  
+            const { academic_year, course_code, department_code } = metadata;
+            if (
+              (!selectedCourse || course_code === selectedCourse) &&
+              (!selectedDepartment || department_code === selectedDepartment) &&
+              (!selectedYear || academic_year === selectedYear)
+            ) {
+              return entry;
+            }
+            return null;
+          })
+        );
+      }
+  
+      // Type assertion here to tell TypeScript that filtered array contains only FileEntry elements
+      setFilteredFiles(filtered.filter((entry): entry is FileEntry => entry !== null) as FileEntry[]);
+    };
+  
+    filterFiles();
+  }, [allFiles, selectedCourse, selectedDepartment, selectedYear]);
+  
 
   const handleClick = () => {
     // Refresh the page
     window.location.reload();
   };
 
-  const totalPages = Math.ceil(allFiles.length / ITEMS_PER_PAGE); // Calculate total pages
+  const totalPages = filteredFiles ? Math.ceil(filteredFiles.length / ITEMS_PER_PAGE) : Math.ceil(allFiles.length / ITEMS_PER_PAGE); // Calculate total pages
 
   // Pagination event handlers
   const nextPage = () => {
@@ -50,12 +86,9 @@ const AllFiles = () => {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
-  const courseOptions = Array.from({ length: 100 }, (_, i) => `COE ${i + 1}`);
-  const departmentOptions = Array.from(
-    { length: 100 },
-    (_, i) => ` ${i + 100}`
-  );
-  const academicYearOptions = ['2022/2023', '2023/2024']; // Sample options for Academic Year filter
+  const courseOptions = generateCourseCodes();
+  const departmentOptions = generateDepartmentCode();
+  const academicYearOptions = generateAcademicYears();
 
   return (
     <Layout>
@@ -129,14 +162,9 @@ const AllFiles = () => {
                 sx={sx}
               />
             </div>
-            <AllFilesContainer>
-              {/* Render items based on current page */}
-              {entries.slice(startIndex, endIndex).map((entry, index) => (
-                <SharedCard
-                  key={index}
-                  name_of_file={entry.name}
-                  entry={entry}
-                />
+              <AllFilesContainer>
+              {filteredFiles.slice(startIndex, endIndex).map((entry, index) => (
+                <SharedCard key={index} name_of_file={entry.name} entry={entry} />
               ))}
             </AllFilesContainer>
           </div>
@@ -185,6 +213,7 @@ const AllFiles = () => {
             style={{
               color: THEME.colors.text.primary,
               fontSize: '0.8rem',
+              paddingRight: '8rem',
             }}
           >
             Page {currentPage} of {totalPages}

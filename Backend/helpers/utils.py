@@ -80,12 +80,12 @@ def mark_predictions(prediction: Dict[int, str],  master_key: Dict[str, str]) ->
     return count
             
 
-def save_response_to_csv(response_data, course_code):
+def save_response_to_csv(response_data, course_code, department_code):
     academic_year = set_current_academic_year()
     createdAt = get_current_datetime()
     # Create the CSV file path with the dynamic part in the file name
-    predictions_csv_file_name  = f"{course_code}.csv"
-    predictions_csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", predictions_csv_file_name)
+    predictions_csv_file_name  = f"{course_code}_{department_code}.csv"
+    predictions_csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", "result", predictions_csv_file_name)
 
    # Check if the predictions CSV file already exists
     predictions_file_exists = os.path.isfile(predictions_csv_file_path)
@@ -110,13 +110,13 @@ def save_response_to_csv(response_data, course_code):
 
     # Create a separate CSV file for metadata
     metadata_file_name = f"metadata.csv"
-    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", metadata_file_name)
+    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", "result", metadata_file_name)
 
     # Check if the metadata CSV file already exists
     metadata_file_exists = os.path.isfile(metadata_file_path)
 
     # Extract the keys for the metadata CSV header
-    metadata_header = ['file_name', 'academic_year', 'createdAt']
+    metadata_header = ['file_name', 'academic_year', 'course_code', 'department_code', 'createdAt']
 
     academic_year = set_current_academic_year()
     createdAt = get_current_datetime()
@@ -128,6 +128,8 @@ def save_response_to_csv(response_data, course_code):
         metadata_writer.writerow({
             'file_name': predictions_csv_file_name,
             'academic_year': academic_year,
+            'course_code': course_code,
+            'department_code': department_code,
             'createdAt': createdAt
         })
 
