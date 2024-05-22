@@ -9,3 +9,12 @@ export type GenericInputProps = {
   type?: React.HTMLInputTypeAttribute;
   data?: readonly (number | string | SelectItem)[];
 };
+
+export type MetadataType = {
+  name_of_file: string;
+  academic_year: string; 
+  course_code: string;
+  department_code: string
+  createdAt: Date; 
+  image_dir: string;
+};

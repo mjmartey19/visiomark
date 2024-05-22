@@ -7,6 +7,7 @@ export interface ITableDataProps {
 
 export interface TableSortProps {
   data: ITableDataProps[];
+  csv_file_name: string
 }
 
 export interface ThProps {

@@ -38,8 +38,8 @@ const SharedCardMenu = ({
     const data = await readCSVFile({ name_of_file });
     if (!data) return;
     setResponseData(data);
-    navigate(`${Constants.PATHS.preview}`, { state: data });
-  };
+    navigate(`${Constants.PATHS.preview}`, { state: { data, name_of_file } });
+};
 
   const sendCSVByEmail = async () => {
     // Here you would implement the logic to send the CSV file to the provided email

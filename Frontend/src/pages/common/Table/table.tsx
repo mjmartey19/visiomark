@@ -16,13 +16,14 @@ import { BiChevronDown, BiChevronUp, BiSearch } from 'react-icons/bi';
 import { HiSelector } from 'react-icons/hi';
 import styled from 'styled-components';
 import { appContext } from '../../../utils/Context';
-import { isString } from '../../../utils/helper';
+import { getMetadata, isString } from '../../../utils/helper';
 import { useMantineTheme } from '@mantine/core';
 import { THEME } from '../../../appTheme';
 import { FaEye } from "react-icons/fa6";
 import { useDisclosure } from '@mantine/hooks';
 import ModalComp from '../Modal/Modal';
 import ModalPreview from '../../file-preview/ModalPreview';
+import { MetadataType } from '../components/types';
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -141,7 +142,9 @@ function sortData(
   );
 }
 
-function GenericTable({ data }: TableSortProps) {
+
+
+function GenericTable({ data, csv_file_name }: TableSortProps) {
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
   const theme = useMantineTheme();
@@ -150,6 +153,23 @@ function GenericTable({ data }: TableSortProps) {
   const [sortBy, setSortBy] = useState<keyof ITableDataProps | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
+  const [metadata, setMetadata] = useState<MetadataType | null>(null);
+
+const fetchMetaData = async () => {
+  try {
+    const data = await getMetadata(csv_file_name); // Fetch metadata
+    setMetadata(data); 
+  } catch (error) {
+    console.error('Error fetching metadata:', error);
+  }
+
+};
+
+useEffect(() => {
+  if (csv_file_name) { 
+    fetchMetaData();
+  }
+}, [csv_file_name]);
 
   const setSorting = (field: keyof ITableDataProps) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -194,7 +214,7 @@ const rows = sortedData.map((row) => {
         </Text>
       </td>
       <td style={{ paddingLeft: '7rem' }} >
-        <ModalPreview open={rowOpenState[row.file_name] || false} close={() => handlePreview(row.file_name)} data={row}/>
+        {rowOpenState && <ModalPreview open={rowOpenState[row.file_name] || false} close={() => handlePreview(row.file_name)} data={row} image_dir = {metadata?.image_dir}/>}
         <FaEye size={20} style={{ cursor: 'pointer' }} color={THEME.colors.text.primary} onClick={() => handlePreview(row.file_name)} />
       </td>
     </tr>
@@ -220,7 +240,7 @@ const rows = sortedData.map((row) => {
             fz="1rem"
             fw={700}
           >
-           COE 354
+           {csv_file_name.split('_')[0].toUpperCase()}
         </Text>
       <TextInput
         placeholder="Search by index no."

@@ -35,8 +35,11 @@ class ImageMarker:
             id + 1: predicted_label for id, predicted_label in enumerate(predictions)
         }
         score = mark_predictions(results, self.master_key)
+        
+        file_name = (self.image_path).split('/')[-1]
+        file_name = file_name.split('\\')[-1]
         accum_result = {
-            "file_name": (self.image_path).split('/')[-1],
+            "file_name": file_name,
             'predictions': results,
             "score": score,
             "index_number": index_number

@@ -9,6 +9,7 @@ type MetadataType = {
   course_code: string;
   department_code: string;
   createdAt: Date; 
+  image_dir: string;
 };
 
 export const readCSVFile = async ({
@@ -68,6 +69,7 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
         course_code: rowData[2],
         department_code: rowData[3],
         createdAt: new Date(rowData[4].trim()), // Convert to Date object
+        image_dir: rowData[5]
       };
       return item;
     });

@@ -6,9 +6,12 @@ import { appContext } from '../../utils/Context';
 
 const Preview = () => {
   const { responseData } = useContext(appContext);
+  const location = useLocation();
+  const { name_of_file } = location.state;
+
   return (
     <Layout>
-      <GenericTable data={responseData} />
+      <GenericTable data={responseData} csv_file_name={name_of_file}/>
     </Layout>
   );
 };

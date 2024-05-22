@@ -28,8 +28,11 @@ const useDashboard = () => {
 
     if (result) {
       setSelectedFolder(result);
+      console.log(result)
     }
+    
   };
+
 
   const mutate = useMutation({
     mutationFn: async (data: { [key: string]: string }) => {

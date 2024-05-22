@@ -15,15 +15,9 @@ import { appContext } from '../../../../utils/Context';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import SharedCardMenu from './cardMenu';
 import moment from 'moment';
+import { MetadataType } from '../types';
 
 
-type MetadataType = {
-  name_of_file: string;
-  academic_year: string; 
-  course_code: string;
-  department_code: string
-  createdAt: Date; 
-};
 
 const SharedCard = ({
   name_of_file,

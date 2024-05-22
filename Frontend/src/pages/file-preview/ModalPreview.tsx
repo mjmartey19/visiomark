@@ -4,12 +4,13 @@ import { Text, Input } from '@mantine/core';
 import { THEME } from '../../appTheme';
 import GenericBtn from '../common/components/button';
 import { ITableDataProps } from '../common/Table/types';
-
+import { readBinaryFile } from '@tauri-apps/api/fs';
 
 interface ModalPreviewProps {
   open: boolean;
   close: () => void;
   data: ITableDataProps;
+  image_dir: string | undefined;
 }
 
 const AnswerCard = ({
@@ -57,7 +58,7 @@ const AnswerCard = ({
   );
 };
 
-const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data }) => {
+const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data, image_dir }) => {
   const [page, setPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -69,6 +70,30 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data }) => {
   const answersPerPage = !isEditing ? 56 : 48;
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
+  const [imageSrc, setImageSrc] = useState<string>('');
+
+  const image_dirs = 'exam_sheets_6'
+  // console.log(image_dir);
+  const image_path =  `${image_dir}\\${data.file_name}`
+  console.log(image_path)
+
+  useEffect(() => {
+    if (image_dir) {
+      // Read image file
+      readImageFile(image_path);
+    }
+  }, [image_path, data]);
+
+  const readImageFile = async (path: string) => {
+    try {
+      const imageBinary = await readBinaryFile(path);
+      const dataUrl = `data:image/jpeg;base64,${btoa(new Uint8Array(imageBinary).reduce((data, byte) => data + String.fromCharCode(byte), ''))}`;
+      setImageSrc(dataUrl);
+    } catch (error) {
+      console.error("Error reading image file:", error);
+    }
+  };
+  // console.log(image_path)
 
   useEffect(() => {
     const markingScheme: string[] = generateMarkingScheme();
@@ -213,24 +238,26 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({ open, close, data }) => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
           >
-            <img
-              ref={imageRef}
-              src="/src/assets/scan01.jpg"
-              style={{
-                width: '23rem',
-                transform: `scale(${zoom / 100}) translateY(${draggedY}px)`,
-                transition: 'transform 0.3s ease-in-out',
-                userSelect: 'none',
-              }}
-              alt="logo"
-              onWheel={(e) => {
-                if (e.deltaY < 0) {
-                  handleZoomIn();
-                } else {
-                  handleZoomOut();
-                }
-              }}
-            />
+           <img
+  ref={imageRef}
+  src={imageSrc}
+  style={{
+    width: '23rem',
+    transform: `scale(${zoom / 100}) translateY(${draggedY}px)`,
+    transition: 'transform 0.3s ease-in-out',
+    userSelect: 'none',
+  }}
+  alt="Scan sheet"
+  onLoad={() => console.log("Image loaded successfully")}
+  onError={(e) => console.error("Error loading image:", e)}
+  onWheel={(e) => {
+    if (e.deltaY < 0) {
+      handleZoomIn();
+    } else {
+      handleZoomOut();
+    }
+  }}
+/>
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
               <button onClick={handleZoomIn}>+</button>
               <button onClick={handleZoomOut}>-</button>
