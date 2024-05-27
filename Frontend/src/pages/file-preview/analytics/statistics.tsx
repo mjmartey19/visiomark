@@ -1,16 +1,21 @@
+import React, { useContext } from 'react';
 import useStatistics from '../hooks/useStatistics';
 import Layout from '../../common/components/Layout';
-
 import { StatsGrid } from './components/StatGrid';
 import ScoreChart from './components/ScoreChart';
 import { Badge, ScrollArea, Text } from '@mantine/core';
 import { StatsSegments } from './components/StatsWithSegment';
 import styled from 'styled-components';
 import { THEME } from '../../../appTheme';
+import { appContext } from '../../../utils/Context';
 
 const Statistics = () => {
-  const { summaryData, scores, a, numberOfQuestions, numberOfStudents } =
-    useStatistics();
+  const { summaryData, scores, a, numberOfQuestions, numberOfStudents } = useStatistics();
+  const { fileName } = useContext(appContext);
+
+  // Remove department name and file extension from file name
+  const fileTitle = fileName.split('_')[0].toUpperCase();
+
   return (
     <Layout>
       <div
@@ -28,7 +33,7 @@ const Statistics = () => {
             fz="1rem"
             fw={700}
           >
-            COE 354 Summary
+            {fileTitle} Summary
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Badge
@@ -42,7 +47,7 @@ const Statistics = () => {
               {numberOfStudents} sheets
             </Badge>
             <Badge
-               sx={{
+              sx={{
                 background: 'transparent',  
                 color: `${THEME.colors.text.primary}`,
                 padding: '1rem',
@@ -60,22 +65,22 @@ const Statistics = () => {
         >
           <div>
             <StatsGrid data={summaryData} />
-           <div style={{
-            marginTop: '1rem',
-            border: `1px solid ${THEME.colors.background.jet}`,
-            borderRadius: '10px',
-            padding: '2rem'
-           }}>
-           <Text
-              sx={{ fontFamily: 'Greycliff CF, sans-serif',   color: `${THEME.colors.text.primary}`,paddingLeft: '3.5rem', paddingBottom: '0.5rem' }}
-              ta="left"
-              fz="1rem"
-              fw={700}
-            >
-              Score Visualization
-            </Text>
-            <ScoreChart scores={scores} />
-           </div>
+            <div style={{
+              marginTop: '1rem',
+              border: `1px solid ${THEME.colors.background.jet}`,
+              borderRadius: '10px',
+              padding: '2rem'
+            }}>
+              <Text
+                sx={{ fontFamily: 'Greycliff CF, sans-serif', color: `${THEME.colors.text.primary}`, paddingLeft: '3.5rem', paddingBottom: '0.5rem' }}
+                ta="left"
+                fz="1rem"
+                fw={700}
+              >
+                Score Visualization
+              </Text>
+              <ScoreChart scores={scores} />
+            </div>
             <StatsSegments data={a.data} diff={a.diff} total={a.total} />
           </div>
         </ScrollArea>
