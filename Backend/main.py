@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from helpers.utils import save_response_to_csv
 import shutil
+import datetime
 
 
 app = FastAPI()
@@ -32,16 +33,14 @@ class ImageProcessingModel(pydantic.BaseModel):
     
     master_key: dict = {}
 
-def copy_images_to_visioMark(image_dir: str):
+def copy_images_to_visioMark(image_dir: str, course_code: str):
     visioMark_dir = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", "exam_sheets")
-    target_dir = os.path.join(visioMark_dir, "exam_sheets")
-    
-    # Find the next available index for the directory name
-    i = 1
-    while os.path.exists(f"{target_dir}_{i}"):
-        i += 1
-        
-    new_dir_name = f"{target_dir}_{i}"
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+    target_dir = os.path.join(visioMark_dir, course_code.replace(' ', ''))
+
+    new_dir_name = f"{target_dir}_{timestamp}"
     os.makedirs(new_dir_name)
     
     # Move files from image_dir to the new directory
@@ -76,7 +75,7 @@ async def predict_score(ipm: ImageProcessingModel):
         response = serial_predictions(ipm, image_file_names)
 
         # Move images to visioMark folder
-        new_image_dir = copy_images_to_visioMark(ipm.image_dir)
+        new_image_dir = copy_images_to_visioMark(ipm.image_dir, ipm.course_code)
     # if len(image_file_names) > 10:
     #     logging.info("Multiprocessi ng predictions started.")
     #     response = multiprocessing_predictions(ipm, image_file_names)
