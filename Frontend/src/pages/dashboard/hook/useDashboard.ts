@@ -59,10 +59,8 @@ const useDashboard = () => {
         const responseData: [string, ITableDataProps[]] = await response.json();
 
         if (response.ok) {
-          // close();
           
           storeToLocalStorage(responseData[0]);
-          localStorage.setItem('masterKeys', JSON.stringify(all));
           setResponseData(responseData[1]);
           setForPreview(true);
           AppAlert({

@@ -2,15 +2,8 @@ import { useContext, useState } from 'react';
 import { appContext } from './Context';
 import { BaseDirectory, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
+import { MetadataType } from '../pages/common/components/types';
 
-type MetadataType = {
-  name_of_file: string;
-  academic_year: string; 
-  course_code: string;
-  department_code: string;
-  createdAt: Date; 
-  image_dir: string;
-};
 
 export const readCSVFile = async ({
   name_of_file,
@@ -44,14 +37,14 @@ console.log(data)
   }
 };
 
-export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
+const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
     }
 
     // Read metadata CSV file
-    const metadataResult = await readTextFile(`visioMark\\result\\metadata.csv`, {
+    const metadataResult = await readTextFile('visioMark\\result\\metadata.csv', {
       dir: BaseDirectory.Document,
     });
 
@@ -63,13 +56,26 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
     // Parse metadata CSV data
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
       const rowData = row.split(',');
+
+      // Debugging output for JSON parsing issues
+      console.log('Row Data:', rowData[6]);
+
+      let marking_scheme: { [key: number]: string } = {};
+      try {
+        marking_scheme = JSON.parse(rowData[6].replace(/'/g, '"'));
+      } catch (jsonError) {
+        console.error('JSON parsing error:', jsonError);
+        console.error('Invalid JSON:', rowData[6]);
+      }
+
       const item: MetadataType = {
         name_of_file: rowData[0],
         academic_year: rowData[1],
         course_code: rowData[2],
         department_code: rowData[3],
         createdAt: new Date(rowData[4].trim()), // Convert to Date object
-        image_dir: rowData[5]
+        image_dir: rowData[5],
+        marking_scheme
       };
       return item;
     });

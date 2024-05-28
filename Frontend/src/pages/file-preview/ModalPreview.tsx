@@ -12,6 +12,7 @@ interface ModalPreviewProps {
   close: () => void;
   data: ITableDataProps;
   image_dir: string | undefined;
+  markingScheme: { [key: number]: string } | undefined;
 }
 
 const AnswerCard = ({
@@ -74,6 +75,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   close,
   data,
   image_dir,
+  markingScheme,
 }) => {
   const [page, setPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
@@ -89,7 +91,8 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
-
+  console.log('Marking Scheme');
+console.log(markingScheme)
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
       const image_path = `${image_dir
@@ -116,17 +119,17 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   useEffect(() => {
     // const studentAnswers: string[] = generateStudentAnswers();
     const markingScheme: string[] = generateMarkingScheme();
+    // console.log(markingScheme);
     const studentAnswers: string[] = data.predictions.split(',');
     const comparisonResult = compareAnswers(studentAnswers, markingScheme);
     setResult(comparisonResult);
   }, [data.predictions]);
 
   const generateMarkingScheme = (): string[] => {
-    const markingScheme: string[] = [];
-    for (let i: number = 0; i < 100; i++) {
-      markingScheme.push(generateRandomAnswer());
+    if (markingScheme) {
+      return Object.values(markingScheme);
     }
-    return markingScheme;
+    return [];
   };
 
   const generateRandomAnswer = (): string => {
