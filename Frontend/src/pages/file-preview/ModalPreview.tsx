@@ -113,8 +113,10 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   };
 
   useEffect(() => {
+    // const studentAnswers: string[] = generateStudentAnswers();
     const markingScheme: string[] = generateMarkingScheme();
-    const studentAnswers: string[] = generateStudentAnswers();
+    const studentAnswers: string[] = data.predictions.split(',');
+    console.log(studentAnswers);
     const comparisonResult = compareAnswers(studentAnswers, markingScheme);
     setResult(comparisonResult);
   }, []);
