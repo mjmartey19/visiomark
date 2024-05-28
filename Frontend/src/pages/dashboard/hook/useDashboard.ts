@@ -62,6 +62,7 @@ const useDashboard = () => {
           // close();
           
           storeToLocalStorage(responseData[0]);
+          localStorage.setItem('masterKeys', JSON.stringify(all));
           setResponseData(responseData[1]);
           setForPreview(true);
           AppAlert({
