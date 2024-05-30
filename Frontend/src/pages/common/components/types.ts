@@ -17,4 +17,5 @@ export type MetadataType = {
   department_code: string
   createdAt: Date; 
   image_dir: string;
+  marking_scheme: { [key: number]: string } 
 };

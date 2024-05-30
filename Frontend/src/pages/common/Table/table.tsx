@@ -223,7 +223,7 @@ function GenericTable({ data, csv_file_name }: TableSortProps) {
               close={() => handlePreview(row.file_name)}
               data={row}
               image_dir={metadata?.image_dir}
-              markingScheme={metadata?.marking_scheme}
+              marking_scheme={metadata?.marking_scheme}
             />
           )}
         </td>
