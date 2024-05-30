@@ -44,7 +44,7 @@ console.log(data)
   }
 };
 
-export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
+const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
@@ -56,16 +56,9 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
     });
 
     const metadataCsvData = metadataResult.trim().split('\n');
-
+    
     // Remove the first row (headers)
     metadataCsvData.shift();
-
-    // Function to split CSV row correctly
-    const splitCsvRow = (row: string) => {
-      const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
-      const matches = row.match(regex);
-      return matches ? matches.map(match => match.replace(/^"|"$/g, '')) : [];
-    };
 
     // Parse metadata CSV data
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
@@ -88,21 +81,21 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
         course_code: rowData[2],
         department_code: rowData[3],
         createdAt: new Date(rowData[4].trim()), // Convert to Date object
-        image_dir: rowData[5]
+        image_dir: rowData[5],
+        marking_scheme,
       };
       return item;
     });
 
-    // Find the metadata for the specified file
-    const metadata = metadataData.find((item) => item.name_of_file === name_of_file);
+    // Find the metadata corresponding to the file name
+    const metadata = metadataData.find((metadataItem) => metadataItem.name_of_file === name_of_file);
 
-    return metadata || null;
+    return metadata || null; // Return null if metadata is not found
   } catch (error) {
-    console.error('Error getting metadata:', error);
+    console.log(error);
     return null;
   }
 };
-
 
 export const deleteCSVFile = async (name_of_file: string | undefined) => {
   try {

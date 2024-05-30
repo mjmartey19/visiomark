@@ -161,13 +161,8 @@ function GenericTable({ data, csv_file_name }: TableSortProps) {
       console.error('Error fetching metadata:', error);
     }
   };
-  
-  useEffect(() => {
-    fetchMetaData();
-  }, [])
-console.log('Fetching metadata')
-console.log(metadata)
-console.log(csv_file_name)
+
+
 
   const setSorting = (field: keyof ITableDataProps) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -190,6 +185,7 @@ console.log(csv_file_name)
 
   const handlePreview = (fileName: string) => {
     setActiveModalRow((prev) => (prev === fileName ? null : fileName)); // Toggle modal for the row
+    fetchMetaData();
   };
 
   const rows = sortedData.map((row) => {
@@ -227,6 +223,7 @@ console.log(csv_file_name)
               close={() => handlePreview(row.file_name)}
               data={row}
               image_dir={metadata?.image_dir}
+              markingScheme={metadata?.marking_scheme}
             />
           )}
         </td>
