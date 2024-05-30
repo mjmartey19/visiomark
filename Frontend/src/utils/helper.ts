@@ -37,7 +37,7 @@ console.log(data)
   }
 };
 
-const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
+export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
@@ -49,24 +49,49 @@ const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> 
     });
 
     const metadataCsvData = metadataResult.trim().split('\n');
-    
+
     // Remove the first row (headers)
     metadataCsvData.shift();
 
+    // Function to split CSV row correctly
+    const splitCsvRow = (row: string) => {
+      const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+      const matches = row.match(regex);
+      return matches ? matches.map(match => match.replace(/^"|"$/g, '')) : [];
+    };
+
     // Parse metadata CSV data
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
-      const rowData = row.split(',');
+      const rowData = splitCsvRow(row);
 
       // Debugging output for JSON parsing issues
-      console.log('Row Data:', rowData[6]);
+      // console.log('Row Data:');
+      // console.log(rowData);
 
-      let marking_scheme: { [key: number]: string } = {};
+      let scheme: { [key: string]: string } = {};
       try {
-        marking_scheme = JSON.parse(rowData[6].replace(/'/g, '"'));
-      } catch (jsonError) {
-        console.error('JSON parsing error:', jsonError);
-        console.error('Invalid JSON:', rowData[6]);
+        // Ensure the string is properly formatted as JSON
+        const jsonStr = rowData[6].replace(/'/g, '"'); // Replace single quotes with double quotes
+        scheme = JSON.parse(jsonStr);
+        // console.log(scheme);
+      } catch (error) {
+        console.error('Error parsing marking scheme:', error);
+        console.error('Row data causing error:', rowData[6]);
       }
+
+      // Convert scheme to marking_scheme format
+      const marking_scheme: { [key: number]: string } = {};
+      for (const key in scheme) {
+        if (scheme.hasOwnProperty(key)) {
+          const numKey = parseInt(key, 10);
+          if (!isNaN(numKey)) {
+            marking_scheme[numKey] = scheme[key];
+          } else {
+            console.warn(`Invalid key for marking scheme: ${key}`);
+          }
+        }
+      }
+      // console.log(marking_scheme);
 
       const item: MetadataType = {
         name_of_file: rowData[0],
@@ -75,20 +100,21 @@ const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> 
         department_code: rowData[3],
         createdAt: new Date(rowData[4].trim()), // Convert to Date object
         image_dir: rowData[5],
-        marking_scheme
+        marking_scheme,
       };
       return item;
     });
 
-    // Find the metadata corresponding to the file name
-    const metadata = metadataData.find((metadataItem) => metadataItem.name_of_file === name_of_file);
+    // Find the metadata for the specified file
+    const metadata = metadataData.find((item) => item.name_of_file === name_of_file);
 
-    return metadata || null; // Return null if metadata is not found
+    return metadata || null;
   } catch (error) {
-    console.log(error);
+    console.error('Error getting metadata:', error);
     return null;
   }
 };
+
 
 export const deleteCSVFile = async (name_of_file: string | undefined) => {
   try {

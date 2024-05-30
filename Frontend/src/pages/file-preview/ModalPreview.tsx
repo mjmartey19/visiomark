@@ -12,7 +12,7 @@ interface ModalPreviewProps {
   close: () => void;
   data: ITableDataProps;
   image_dir: string | undefined;
-  markingScheme: { [key: number]: string } | undefined;
+  marking_scheme: { [key: number]: string } | undefined;
 }
 
 const AnswerCard = ({
@@ -75,7 +75,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   close,
   data,
   image_dir,
-  markingScheme,
+  marking_scheme,
 }) => {
   const [page, setPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
@@ -92,7 +92,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
   console.log('Marking Scheme');
-console.log(markingScheme)
+console.log(marking_scheme)
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
       const image_path = `${image_dir
@@ -126,8 +126,8 @@ console.log(markingScheme)
   }, [data.predictions]);
 
   const generateMarkingScheme = (): string[] => {
-    if (markingScheme) {
-      return Object.values(markingScheme);
+    if (marking_scheme) {
+      return Object.values(marking_scheme);
     }
     return [];
   };
