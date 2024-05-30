@@ -2,8 +2,15 @@ import { useContext, useState } from 'react';
 import { appContext } from './Context';
 import { BaseDirectory, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
-import { MetadataType } from '../pages/common/components/types';
 
+type MetadataType = {
+  name_of_file: string;
+  academic_year: string; 
+  course_code: string;
+  department_code: string;
+  createdAt: Date; 
+  image_dir: string;
+};
 
 export const readCSVFile = async ({
   name_of_file,
@@ -44,7 +51,7 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
     }
 
     // Read metadata CSV file
-    const metadataResult = await readTextFile('visioMark\\result\\metadata.csv', {
+    const metadataResult = await readTextFile(`visioMark\\result\\metadata.csv`, {
       dir: BaseDirectory.Document,
     });
 
@@ -62,36 +69,18 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
 
     // Parse metadata CSV data
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
-      const rowData = splitCsvRow(row);
+      const rowData = row.split(',');
 
       // Debugging output for JSON parsing issues
-      // console.log('Row Data:');
-      // console.log(rowData);
+      console.log('Row Data:', rowData[6]);
 
-      let scheme: { [key: string]: string } = {};
+      let marking_scheme: { [key: number]: string } = {};
       try {
-        // Ensure the string is properly formatted as JSON
-        const jsonStr = rowData[6].replace(/'/g, '"'); // Replace single quotes with double quotes
-        scheme = JSON.parse(jsonStr);
-        // console.log(scheme);
-      } catch (error) {
-        console.error('Error parsing marking scheme:', error);
-        console.error('Row data causing error:', rowData[6]);
+        marking_scheme = JSON.parse(rowData[6].replace(/'/g, '"'));
+      } catch (jsonError) {
+        console.error('JSON parsing error:', jsonError);
+        console.error('Invalid JSON:', rowData[6]);
       }
-
-      // Convert scheme to marking_scheme format
-      const marking_scheme: { [key: number]: string } = {};
-      for (const key in scheme) {
-        if (scheme.hasOwnProperty(key)) {
-          const numKey = parseInt(key, 10);
-          if (!isNaN(numKey)) {
-            marking_scheme[numKey] = scheme[key];
-          } else {
-            console.warn(`Invalid key for marking scheme: ${key}`);
-          }
-        }
-      }
-      // console.log(marking_scheme);
 
       const item: MetadataType = {
         name_of_file: rowData[0],
@@ -99,8 +88,7 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
         course_code: rowData[2],
         department_code: rowData[3],
         createdAt: new Date(rowData[4].trim()), // Convert to Date object
-        image_dir: rowData[5],
-        marking_scheme,
+        image_dir: rowData[5]
       };
       return item;
     });

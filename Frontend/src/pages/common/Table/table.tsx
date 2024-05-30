@@ -227,7 +227,6 @@ console.log(csv_file_name)
               close={() => handlePreview(row.file_name)}
               data={row}
               image_dir={metadata?.image_dir}
-              marking_scheme={metadata?.marking_scheme}
             />
           )}
         </td>

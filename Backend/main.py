@@ -29,6 +29,8 @@ class ImageProcessingModel(pydantic.BaseModel):
     no_of_questions: str = '40',
     course_code: str
     department_code: str
+
+    
     master_key: dict = {}
 
 def copy_images_to_visioMark(image_dir: str, course_code: str):
@@ -81,7 +83,7 @@ async def predict_score(ipm: ImageProcessingModel):
     if len(image_file_names) == 0:
         raise HTTPException(status_code=status.HTTP_200_SUCCESS, detail= "No images found in the directory.")
     
-    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code, department_code=ipm.department_code, new_image_dir=new_image_dir, marking_scheme=ipm.master_key)
+    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code, department_code=ipm.department_code, new_image_dir=new_image_dir)
     print(f"CSV_FILE {csv_file}")
     
     return [ csv_file, response ]
