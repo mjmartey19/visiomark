@@ -84,11 +84,14 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const [editedAnswers, setEditedAnswers] = useState<string[]>([]);
   const [indexNumber, setIndexNumber] = useState<string>(data['index number']);
   const [isIndexEditing, setIsIndexEditing] = useState<boolean>(false);
-
+  
   const answersPerPage = !isEditing ? 56 : 42;
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
+
+  console.log(indexNumber);
+  console.log(result);  
 
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
