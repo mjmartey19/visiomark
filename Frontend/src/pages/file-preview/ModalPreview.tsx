@@ -91,15 +91,15 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
-  console.log('Marking Scheme');
-console.log(marking_scheme)
+//   console.log('Marking Scheme');
+// console.log(marking_scheme)
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
       const image_path = `${image_dir
         .trim()
         .replace(/\\/g, '/')}/${data.file_name.trim()}`;
       readImageFile(image_path);
-      console.log(image_path);
+      // console.log(image_path);
     }
   }, [image_dir, data.file_name]);
 
@@ -117,13 +117,16 @@ console.log(marking_scheme)
   };
 
   useEffect(() => {
-    // const studentAnswers: string[] = generateStudentAnswers();
+
     const markingScheme: string[] = generateMarkingScheme();
-    // console.log(markingScheme);
-    const studentAnswers: string[] = data.predictions.split(',');
+    console.log(markingScheme);
+    const studentAnswers: string[] = data.predictions.split(',').map(ans => ans.trim());
+    console.log(studentAnswers)
     const comparisonResult = compareAnswers(studentAnswers, markingScheme);
+    console.log(comparisonResult)
     setResult(comparisonResult);
-  }, [data.predictions]);
+  
+  }, [data.predictions, marking_scheme]);
 
   const generateMarkingScheme = (): string[] => {
     if (marking_scheme) {
@@ -132,22 +135,18 @@ console.log(marking_scheme)
     return [];
   };
 
-  const generateRandomAnswer = (): string => {
-    const answers: string[] = ['A', 'B', 'C', 'D', 'E'];
-    const randomIndex: number = Math.floor(Math.random() * answers.length);
-    return answers[randomIndex];
-  };
-
   const compareAnswers = (
     studentAnswers: string[],
     markingScheme: string[]
   ): { answer: string; color: string }[] => {
     const result: { answer: string; color: string }[] = [];
     for (let i: number = 0; i < studentAnswers.length; i++) {
-      if (studentAnswers[i] === markingScheme[i]) {
-        result.push({ answer: studentAnswers[i], color: '#006D32' });
+      const studentAnswer = studentAnswers[i];
+      const correctAnswer = markingScheme[i];
+      if (studentAnswer && correctAnswer && studentAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+        result.push({ answer: studentAnswer, color: '#006D32' });
       } else {
-        result.push({ answer: studentAnswers[i], color: 'red' });
+        result.push({ answer: studentAnswer, color: 'red' });
       }
     }
     return result;

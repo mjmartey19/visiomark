@@ -37,14 +37,15 @@ console.log(data)
   }
 };
 
-const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
+
+export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
     }
 
     // Read metadata CSV file
-    const metadataResult = await readTextFile('visioMark\\result\\metadata.csv', {
+    const metadataResult = await readTextFile(`visioMark\\result\\metadata.csv`, {
       dir: BaseDirectory.Document,
     });
 
@@ -53,14 +54,32 @@ const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> 
     // Remove the first row (headers)
     metadataCsvData.shift();
 
+      // Function to split CSV row correctly
+      const splitCsvRow = (row: string) => {
+        const result = [];
+        let inQuotes = false;
+        let field = '';
+  
+        for (let char of row) {
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(field);
+            field = '';
+          } else {
+            field += char;
+          }
+        }
+        result.push(field);
+        return result;
+      };
+
     // Parse metadata CSV data
+     let marking_scheme = {}
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
-      const rowData = splitCsvRow(row);
-
-      // Debugging output for JSON parsing issues
-      // console.log('Row Data:');
+      
+      const rowData = splitCsvRow(row)
       // console.log(rowData);
-
       let scheme: { [key: string]: string } = {};
       try {
         // Ensure the string is properly formatted as JSON
@@ -84,8 +103,6 @@ const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> 
           }
         }
       }
-      // console.log(marking_scheme);
-
       const item: MetadataType = {
         name_of_file: rowData[0],
         academic_year: rowData[1],
@@ -97,16 +114,21 @@ const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> 
       };
       return item;
     });
-
+    // console.log(metadataData);
+    // console.log(name_of_file)
     // Find the metadata corresponding to the file name
     const metadata = metadataData.find((metadataItem) => metadataItem.name_of_file === name_of_file);
-
+    // console.log(metadata)
     return metadata || null; // Return null if metadata is not found
   } catch (error) {
     console.log(error);
     return null;
   }
 };
+
+
+
+
 
 export const deleteCSVFile = async (name_of_file: string | undefined) => {
   try {
