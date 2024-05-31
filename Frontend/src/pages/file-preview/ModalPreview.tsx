@@ -12,6 +12,7 @@ interface ModalPreviewProps {
   close: () => void;
   data: ITableDataProps;
   image_dir: string | undefined;
+  marking_scheme: { [key: number]: string } | undefined;
 }
 
 const AnswerCard = ({
@@ -74,6 +75,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   close,
   data,
   image_dir,
+  marking_scheme,
 }) => {
   const [page, setPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
@@ -84,14 +86,11 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const [editedAnswers, setEditedAnswers] = useState<string[]>([]);
   const [indexNumber, setIndexNumber] = useState<string>(data['index number']);
   const [isIndexEditing, setIsIndexEditing] = useState<boolean>(false);
-  
-  const answersPerPage = !isEditing ? 56 : 42;
+
+  const answersPerPage = !isEditing ? 49 : 42;
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
-
-  console.log(indexNumber);
-  console.log(result);  
 
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
@@ -99,7 +98,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
         .trim()
         .replace(/\\/g, '/')}/${data.file_name.trim()}`;
       readImageFile(image_path);
-      console.log(image_path);
+      // console.log(image_path);
     }
   }, [image_dir, data.file_name]);
 
@@ -117,24 +116,22 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   };
 
   useEffect(() => {
+
     const markingScheme: string[] = generateMarkingScheme();
-    const studentAnswers: string[] = data.predictions.split(',');
+    console.log(markingScheme);
+    const studentAnswers: string[] = data.predictions.split(',').map(ans => ans.trim());
+    console.log(studentAnswers)
     const comparisonResult = compareAnswers(studentAnswers, markingScheme);
+    console.log(comparisonResult)
     setResult(comparisonResult);
-  }, [data.predictions]);
+  
+  }, [data.predictions, marking_scheme]);
 
   const generateMarkingScheme = (): string[] => {
-    const markingScheme: string[] = [];
-    for (let i: number = 0; i < 100; i++) {
-      markingScheme.push(generateRandomAnswer());
+    if (marking_scheme) {
+      return Object.values(marking_scheme);
     }
-    return markingScheme;
-  };
-
-  const generateRandomAnswer = (): string => {
-    const answers: string[] = ['A', 'B', 'C', 'D', 'E'];
-    const randomIndex: number = Math.floor(Math.random() * answers.length);
-    return answers[randomIndex];
+    return [];
   };
 
   const compareAnswers = (
@@ -143,10 +140,12 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   ): { answer: string; color: string }[] => {
     const result: { answer: string; color: string }[] = [];
     for (let i: number = 0; i < studentAnswers.length; i++) {
-      if (studentAnswers[i] === markingScheme[i]) {
-        result.push({ answer: studentAnswers[i], color: '#006D32' });
+      const studentAnswer = studentAnswers[i];
+      const correctAnswer = markingScheme[i];
+      if (studentAnswer && correctAnswer && studentAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+        result.push({ answer: studentAnswer, color: '#006D32' });
       } else {
-        result.push({ answer: studentAnswers[i], color: 'red' });
+        result.push({ answer: studentAnswer, color: 'red' });
       }
     }
     return result;

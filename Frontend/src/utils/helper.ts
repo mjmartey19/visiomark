@@ -2,15 +2,8 @@ import { useContext, useState } from 'react';
 import { appContext } from './Context';
 import { BaseDirectory, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
+import { MetadataType } from '../pages/common/components/types';
 
-type MetadataType = {
-  name_of_file: string;
-  academic_year: string; 
-  course_code: string;
-  department_code: string;
-  createdAt: Date; 
-  image_dir: string;
-};
 
 export const readCSVFile = async ({
   name_of_file,
@@ -44,6 +37,7 @@ console.log(data)
   }
 };
 
+
 export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
@@ -60,29 +54,81 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
     // Remove the first row (headers)
     metadataCsvData.shift();
 
+      // Function to split CSV row correctly
+      const splitCsvRow = (row: string) => {
+        const result = [];
+        let inQuotes = false;
+        let field = '';
+  
+        for (let char of row) {
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(field);
+            field = '';
+          } else {
+            field += char;
+          }
+        }
+        result.push(field);
+        return result;
+      };
+
     // Parse metadata CSV data
+     let marking_scheme = {}
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
-      const rowData = row.split(',');
+      
+      const rowData = splitCsvRow(row)
+      // console.log(rowData);
+      let scheme: { [key: string]: string } = {};
+      try {
+        // Ensure the string is properly formatted as JSON
+        const jsonStr = rowData[6].replace(/'/g, '"'); // Replace single quotes with double quotes
+        scheme = JSON.parse(jsonStr);
+        // console.log(scheme);
+      } catch (error) {
+        console.error('Error parsing marking scheme:', error);
+        console.error('Row data causing error:', rowData[6]);
+      }
+
+      // Convert scheme to marking_scheme format
+      const marking_scheme: { [key: number]: string } = {};
+      for (const key in scheme) {
+        if (scheme.hasOwnProperty(key)) {
+          const numKey = parseInt(key, 10);
+          if (!isNaN(numKey)) {
+            marking_scheme[numKey] = scheme[key];
+          } else {
+            console.warn(`Invalid key for marking scheme: ${key}`);
+          }
+        }
+      }
       const item: MetadataType = {
         name_of_file: rowData[0],
         academic_year: rowData[1],
         course_code: rowData[2],
         department_code: rowData[3],
         createdAt: new Date(rowData[4].trim()), // Convert to Date object
-        image_dir: rowData[5]
+        image_dir: rowData[5],
+        marking_scheme,
       };
       return item;
     });
-
+    // console.log(metadataData);
+    // console.log(name_of_file)
     // Find the metadata corresponding to the file name
     const metadata = metadataData.find((metadataItem) => metadataItem.name_of_file === name_of_file);
-
+    // console.log(metadata)
     return metadata || null; // Return null if metadata is not found
   } catch (error) {
     console.log(error);
     return null;
   }
 };
+
+
+
+
 
 export const deleteCSVFile = async (name_of_file: string | undefined) => {
   try {

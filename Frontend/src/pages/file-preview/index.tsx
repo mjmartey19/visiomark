@@ -1,17 +1,24 @@
-import { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Layout from '../common/components/Layout';
 import GenericTable from '../common/Table/table';
 import { useLocation } from 'react-router-dom';
 import { appContext } from '../../utils/Context';
 
 const Preview = () => {
-  const { responseData } = useContext(appContext);
+  const { responseData, fileName, setFileName } = useContext(appContext);
   const location = useLocation();
-  const { name_of_file } = location.state;
+
+  useEffect(() => {
+    if (location.state?.name_of_file) {
+      setFileName(location.state.name_of_file);
+    }
+  }, [location.state, setFileName]);
+
+  console.log(fileName);
 
   return (
     <Layout>
-      <GenericTable data={responseData} csv_file_name={name_of_file}/>
+      <GenericTable data={responseData} csv_file_name={fileName} />
     </Layout>
   );
 };

@@ -25,6 +25,8 @@ interface IAppContext {
   setResponseData: React.Dispatch<React.SetStateAction<ResponseData>>;
   forPreview: boolean;
   setForPreview: React.Dispatch<React.SetStateAction<boolean>>;
+  fileName: string;
+  setFileName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const appContext = createContext<IAppContext>({
@@ -32,21 +34,24 @@ export const appContext = createContext<IAppContext>({
   setResponseData: () => {},
   forPreview: false,
   setForPreview: () => {},
+  fileName: '',
+  setFileName: () => {},
 });
 
 const AppProvider = ({ children }: { children: React.ReactNode }) => {
-  const [responseData, setResponseData] = usePersistentState<ResponseData>(
-    'responseData',
-    []
-  );
+  const [responseData, setResponseData] = usePersistentState<ResponseData>('responseData', []);
   const [forPreview, setForPreview] = useState(false);
+  const [fileName, setFileName] = usePersistentState<string>('fileName', '');
 
   const value = {
     responseData,
     setResponseData,
     forPreview,
     setForPreview,
+    fileName,
+    setFileName,
   };
+
   return <appContext.Provider value={value}>{children}</appContext.Provider>;
 };
 
