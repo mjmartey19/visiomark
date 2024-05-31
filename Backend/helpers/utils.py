@@ -37,7 +37,7 @@ def index_to_label(index: int):
                     3: 'D', 
                     4: 'E',
                     5: 'Double',
-                    6: 'Exception'
+                    6: ''
                 }
     # index = np.apply_along_axis(tf.argmax, 1, predictions)[0]
     return shading.get(index, f"wrong index {index}")
@@ -116,7 +116,7 @@ def save_response_to_csv(response_data, course_code, department_code, new_image_
     metadata_file_exists = os.path.isfile(metadata_file_path)
 
     # Extract the keys for the metadata CSV header
-    metadata_header = ['file_name', 'academic_year', 'course_code', 'department_code', 'createdAt', 'image_dir', 'markingScheme']
+    metadata_header = ['file_name', 'academic_year', 'course_code', 'department_code', 'createdAt', 'image_dir', 'marking_scheme']
 
     academic_year = set_current_academic_year()
     createdAt = get_current_datetime()
