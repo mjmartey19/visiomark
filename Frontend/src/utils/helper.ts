@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { appContext } from './Context';
-import { BaseDirectory, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, readDir, readTextFile, removeDir, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
 import { MetadataType } from '../pages/common/components/types';
 
@@ -11,7 +11,7 @@ export const readCSVFile = async ({
   name_of_file?: string;
 }) => {
   try {
-    const result = await readTextFile(`visioMark\\result\\${name_of_file}`, {
+    const result = await readTextFile(`VisioMark\\result\\${name_of_file}`, {
       dir: BaseDirectory.Document,
     });
     const csvData = result.trim().split('\n');
@@ -45,7 +45,7 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
     }
 
     // Read metadata CSV file
-    const metadataResult = await readTextFile(`visioMark\\result\\metadata.csv`, {
+    const metadataResult = await readTextFile(`VisioMark\\result\\metadata.csv`, {
       dir: BaseDirectory.Document,
     });
 
@@ -74,8 +74,7 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
         return result;
       };
 
-    // Parse metadata CSV data
-     let marking_scheme = {}
+
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
       
       const rowData = splitCsvRow(row)
@@ -128,20 +127,61 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
 
 
 
+const deleteImageDir = async (name_of_file: string | undefined) => {
+  try {
+    if (!name_of_file) {
+      throw new Error('File name is required');
+    }
 
+    const metadata = await getMetadata(name_of_file);
+    if (metadata && metadata.image_dir) {
+      const imageDirPath = `VisioMark\\exam_sheets\\${metadata.image_dir}`;
+
+      try {
+        // Read directory contents
+        const entries = await readDir(imageDirPath, { dir: BaseDirectory.Document, recursive: true });
+        // Remove each file in the directory
+        for (const entry of entries) {
+          if (entry.children) {
+            for (const child of entry.children) {
+              await removeFile(`${imageDirPath}\\${child.name}`, { dir: BaseDirectory.Document });
+            }
+          } else {
+            await removeFile(`${imageDirPath}\\${entry.name}`, { dir: BaseDirectory.Document });
+          }
+        }
+        // Remove the directory itself
+        await removeDir(imageDirPath, { dir: BaseDirectory.Document });
+        console.log('Image directory deleted successfully.');
+      } catch (removeError) {
+        console.error(`Error deleting image directory at ${imageDirPath}:`, removeError);
+        console.error(`Full error details:`, removeError);
+      }
+    } else {
+      console.log('No image directory metadata found.');
+    }
+  } catch (error) {
+    console.error(`Error retrieving metadata for ${name_of_file}:`, error);
+    console.error(`Full error details:`, error);
+  }
+};
 
 export const deleteCSVFile = async (name_of_file: string | undefined) => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
     }
+
     // Delete CSV file
-    await removeFile(`visioMark\\result\\${name_of_file}`, {
+    await removeFile(`VisioMark\\result\\${name_of_file}`, {
       dir: BaseDirectory.Document,
     });
 
+    // Delete Image_dir
+    await deleteImageDir(name_of_file);
+
     // Read metadata file
-    const metadataFilePath = `visioMark\\result\\metadata.csv`;
+    const metadataFilePath = `VisioMark\\result\\metadata.csv`;
     const metadataContent = await readTextFile(metadataFilePath, {
       dir: BaseDirectory.Document,
     });
@@ -156,11 +196,11 @@ export const deleteCSVFile = async (name_of_file: string | undefined) => {
       dir: BaseDirectory.Document,
     });
 
-    // console.log(`File ${name_of_file} deleted successfully.`);
-
+    // Remove from local storage
     removeFromLocalStorage(name_of_file);
-    // console.log(`File ${name_of_file} remove from local storage successfully.`);
-    window.location.reload(); // Reload the page
+
+    // Reload the page
+    window.location.reload();
   } catch (error) {
     console.error(`Error deleting file ${name_of_file}:`, error);
   }

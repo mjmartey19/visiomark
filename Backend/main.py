@@ -32,14 +32,17 @@ class ImageProcessingModel(pydantic.BaseModel):
     master_key: dict = {}
 
 def copy_images_to_visioMark(image_dir: str, course_code: str):
-    visioMark_dir = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", "exam_sheets")
+    exam_sheets_dir = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", "exam_sheets")
+
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
+    target_dir = os.path.join(exam_sheets_dir, course_code.replace(' ', ''))
 
-    target_dir = os.path.join(visioMark_dir, course_code.replace(' ', ''))
 
     new_dir_name = f"{target_dir}_{timestamp}"
     os.makedirs(new_dir_name)
+   
+    visioMark_dir = f"{course_code.replace(' ', '')}_{timestamp}"
     
     # Move files from image_dir to the new directory
     for root, dirs, files in os.walk(image_dir):
@@ -47,7 +50,7 @@ def copy_images_to_visioMark(image_dir: str, course_code: str):
             shutil.copy(os.path.join(root, file), new_dir_name)
     
     print(f"Directory moved to visioMark folder: {new_dir_name}")
-    return new_dir_name
+    return visioMark_dir
 
 
 @app.get("/")
@@ -73,7 +76,7 @@ async def predict_score(ipm: ImageProcessingModel):
         response = serial_predictions(ipm, image_file_names)
 
         # Move images to visioMark folder
-        new_image_dir = copy_images_to_visioMark(ipm.image_dir, ipm.course_code)
+        image_dir = copy_images_to_visioMark(ipm.image_dir, ipm.course_code)
     # if len(image_file_names) > 10:
     #     logging.info("Multiprocessi ng predictions started.")
     #     response = multiprocessing_predictions(ipm, image_file_names)
@@ -81,7 +84,7 @@ async def predict_score(ipm: ImageProcessingModel):
     if len(image_file_names) == 0:
         raise HTTPException(status_code=status.HTTP_200_SUCCESS, detail= "No images found in the directory.")
     
-    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code, department_code=ipm.department_code, new_image_dir=new_image_dir, marking_scheme=ipm.master_key)
+    csv_file = save_response_to_csv(response_data=response, course_code=ipm.course_code, department_code=ipm.department_code, new_image_dir=image_dir, marking_scheme=ipm.master_key)
     print(f"CSV_FILE {csv_file}")
     
     return [ csv_file, response ]

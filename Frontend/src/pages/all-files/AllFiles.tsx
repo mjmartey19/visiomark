@@ -25,7 +25,7 @@ const AllFiles = () => {
 
   useEffect(() => {
     const fetchFiles = async () => {
-      const entries = await readDir('visioMark\\result', {
+      const entries = await readDir('VisioMark\\result', {
         dir: BaseDirectory.Document,
         recursive: true,
       });

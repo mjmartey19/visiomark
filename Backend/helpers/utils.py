@@ -85,7 +85,7 @@ def save_response_to_csv(response_data, course_code, department_code, new_image_
     createdAt = get_current_datetime()
     # Create the CSV file path with the dynamic part in the file name
     predictions_csv_file_name  = f"{course_code}_{department_code}.csv"
-    predictions_csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", "result", predictions_csv_file_name)
+    predictions_csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", "result", predictions_csv_file_name)
 
    # Check if the predictions CSV file already exists
     predictions_file_exists = os.path.isfile(predictions_csv_file_path)
@@ -110,7 +110,7 @@ def save_response_to_csv(response_data, course_code, department_code, new_image_
 
     # Create a separate CSV file for metadata
     metadata_file_name = f"metadata.csv"
-    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "visioMark", "result", metadata_file_name)
+    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", "result", metadata_file_name)
 
     # Check if the metadata CSV file already exists
     metadata_file_exists = os.path.isfile(metadata_file_path)
@@ -134,9 +134,10 @@ def save_response_to_csv(response_data, course_code, department_code, new_image_
             'image_dir': new_image_dir,
             'marking_scheme': marking_scheme,
         })
-
-    print(f"Metadata saved at: {metadata_file_path}")
-    print(f"CSV file with predictions saved at: {predictions_csv_file_path}")
+  
+    print(f"Marking Scheme:  {len(marking_scheme)}")
+    # print(f"Metadata saved at: {metadata_file_path}")
+    # print(f"CSV file with predictions saved at: {predictions_csv_file_path}")
 
     return predictions_csv_file_name
 

@@ -91,14 +91,13 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
-
+//   console.log('Marking Scheme');
+// console.log(marking_scheme)
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
-      const image_path = `${image_dir
-        .trim()
-        .replace(/\\/g, '/')}/${data.file_name.trim()}`;
+      const image_path = `VisioMark\\exam_sheets\\${image_dir.trim()}\\${data.file_name.trim()}`;
       readImageFile(image_path);
-      // console.log(image_path);
+      console.log(image_path);
     }
   }, [image_dir, data.file_name]);
 
@@ -118,11 +117,13 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   useEffect(() => {
 
     const markingScheme: string[] = generateMarkingScheme();
-    console.log(markingScheme);
+    // console.log('Marking Scheme');
+    // console.log(markingScheme);
     const studentAnswers: string[] = data.predictions.split(',').map(ans => ans.trim());
-    console.log(studentAnswers)
+    // console.log('Student Answers');
+    // console.log(studentAnswers);
     const comparisonResult = compareAnswers(studentAnswers, markingScheme);
-    console.log(comparisonResult)
+    // console.log(comparisonResult)
     setResult(comparisonResult);
   
   }, [data.predictions, marking_scheme]);
