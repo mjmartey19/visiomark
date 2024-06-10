@@ -1,18 +1,21 @@
 import ModalFull from '../common/Modal/ModalFull';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { Text, Input, Loader } from '@mantine/core';
 import { THEME } from '../../appTheme';
 import GenericBtn from '../common/components/button';
 import { ITableDataProps } from '../common/Table/types';
-import { BaseDirectory, readBinaryFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, readBinaryFile, writeFile } from '@tauri-apps/api/fs';
 import { CiEdit } from "react-icons/ci";
+import { appContext } from '../../utils/Context';
 
 interface ModalPreviewProps {
   open: boolean;
   close: () => void;
   data: ITableDataProps;
+  updateData: (updatedData: ITableDataProps[]) => void;
   image_dir: string | undefined;
   marking_scheme: { [key: number]: string } | undefined;
+  csv_file: string | undefined;
 }
 
 const AnswerCard = ({
@@ -74,8 +77,10 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   open,
   close,
   data,
+  updateData,
   image_dir,
   marking_scheme,
+  csv_file
 }) => {
   const [page, setPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
@@ -84,8 +89,11 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const [draggedY, setDraggedY] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedAnswers, setEditedAnswers] = useState<string[]>([]);
-  const [indexNumber, setIndexNumber] = useState<string>(data['index number']);
   const [isIndexEditing, setIsIndexEditing] = useState<boolean>(false);
+  const [indexNumber, setIndexNumber] = useState<string>(data['index number']);
+  const [score, setScore] = useState<number>(data.score);
+
+  const { responseData, setResponseData } = useContext(appContext);
 
   const answersPerPage = !isEditing ? 49 : 42;
   const imageRef = useRef<HTMLImageElement>(null);
@@ -117,7 +125,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   useEffect(() => {
 
     const markingScheme: string[] = generateMarkingScheme();
-    // console.log('Marking Scheme');
+    //console.log('Marking Scheme');
     // console.log(markingScheme);
     const studentAnswers: string[] = data.predictions.split(',').map(ans => ans.trim());
     // console.log('Student Answers');
@@ -241,23 +249,106 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
     setEditedAnswers(updatedAnswers);
   };
 
-  const handleUpdate = () => {
+  
+  const calculateNewScore = (updatedAnswers: string[]): number => {
+    let score = 0;
+    const markingScheme: string[] = generateMarkingScheme();
+    for (let i = 0; i < updatedAnswers.length; i++) {
+      if (updatedAnswers[i].toLowerCase() === markingScheme[i].toLowerCase()) {
+        score += 1;
+      }
+    }
+    return score;
+  };
+  
+  const handleUpdate = async () => {
     const updatedResult = [...result];
     for (let i = 0; i < editedAnswers.length; i++) {
-      updatedResult[(page - 1) * answersPerPage + i].answer = editedAnswers[i];
+      updatedResult[(page - 1) * answersPerPage + i] = {
+        answer: editedAnswers[i],
+        color:
+          editedAnswers[i].toLowerCase() ===
+          generateMarkingScheme()[(page - 1) * answersPerPage + i].toLowerCase()
+            ? '#006D32'
+            : 'red',
+      };
     }
+    console.log('Updated Result:', updatedResult);
+  
     setResult(updatedResult);
-    setIsEditing(false);
+  
+    const updatedPredictions = updatedResult.map((res) => res.answer).join(', ');
+    const newScore = calculateNewScore(updatedResult.map((res) => res.answer));
+    
+    console.log('New Score:', newScore);
+  
+    const updatedData = responseData.map((item) =>
+      item['index number'] === data['index number']
+        ? { ...item, predictions: updatedPredictions, score: newScore }
+        : item
+    );
+    setScore(newScore);
+    updateData(updatedData);
+
+    console.log('Updated Data:', updatedData);
+  
+    // // Update local storage
+    // localStorage.setItem('responseData', JSON.stringify(updatedData));
+    setResponseData(updatedData);
+  
+    const csvData = updatedData
+      .map((row) =>
+        Object.values(row)
+          .map((val) => `${val}`)
+          .join(',')
+      )
+      .join('\n');
+    console.log('CSV Data:', csvData);
+  
+    try {
+      await writeFile(
+        { contents: csvData, path: `VisioMark\\result\\${csv_file}` },
+        { dir: BaseDirectory.Document }
+      );
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error writing to CSV file:', error);
+      // Handle error
+    }
   };
+  
 
   
-  const handleIndexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIndexNumber(e.target.value);
+  const handleIndexChange = async () => {
+    const updatedData = responseData.map((item) =>
+      item['index number'] === data['index number']
+        ? { ...item, 'index number': indexNumber }
+        : item
+    );
+
+    updateData(updatedData);
+
+    // Update local storage
+    // localStorage.setItem('responseData', JSON.stringify(updatedData));
+    setResponseData(updatedData);
+
+    const csvData = updatedData
+      .map((row) =>
+        Object.values(row)
+          .map((val) => `${val}`)
+          .join(',')
+      )
+      .join('\n');
+
+    await writeFile(
+      { contents: csvData, path: `VisioMark\\result\\${csv_file}` },
+      { dir: BaseDirectory.Document }
+    );
+
+    setIsIndexEditing(false);
   };
 
-  const toggleIndexEditing = () => {
-    setIsIndexEditing(!isIndexEditing);
-  };
+
   return (
     <>
       <ModalFull opened={open} close={close}>
@@ -394,12 +485,13 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
                 {isIndexEditing ? (
                   <Input
                     value={indexNumber}
-                    onChange={handleIndexChange}
-                    onBlur={toggleIndexEditing}
+                    onChange={(e) => setIndexNumber(e.target.value)}
+                    onBlur={handleIndexChange}
                     style={{ width: '100px' }}
                   />
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={toggleIndexEditing}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} 
+                  onClick={() => setIsIndexEditing(true)}>
                     <Text color={THEME.colors.text.primary}>{indexNumber}</Text>
                    <CiEdit />
                   </div>
@@ -407,7 +499,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
               </div>
               <div style={{ display: 'flex', gap: '5px' }}>
                 <Text>Score:</Text>
-                <Text color={THEME.colors.text.primary}>{data.score}</Text>
+                <Text color={THEME.colors.text.primary}>{score}</Text>
               </div>
             </div>
             <div style={{ height: '25rem' }}>

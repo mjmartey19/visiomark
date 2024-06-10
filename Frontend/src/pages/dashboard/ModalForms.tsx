@@ -1,23 +1,17 @@
 import ModalComp from '../common/Modal/Modal';
-import { LogoWrapper } from '../common/components/layoutStyles';
 import { UserFormProvider, useUserForm } from '../common/form-context';
 import { UseFormReturnType, zodResolver } from '@mantine/form';
 import { KeyheadStyles, LoaderWrapper, ModalInputs, Title } from './styles';
 import GenericInput from '../common/components/input';
 import GenericBtn from '../common/components/button';
 import { THEME } from '../../appTheme';
-import { SelectInput } from '../common/components/SelectInput';
 import { useEffect, useState } from 'react';
-import { Constants } from '../../utils/constants';
+
 import {
   Group,
   Loader,
   Stepper,
-  Badge,
-  Box,
-  ScrollArea,
-  StepperProps,
-  rem,
+ 
   Text,
 } from '@mantine/core';
 import MasterKeyPage from '../master-key';
@@ -29,8 +23,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true); // State to manage next button disable
   
   const {
-    all,
-    setAll,
     handleFolderSelect,
     mutate,
     selectedFolder,
@@ -45,8 +37,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
       divs.push(
         <MasterKeyPage
           key={i}
-          all={all}
-          setAll={setAll}
           index={i}
           question_number={i}
         />

@@ -12,13 +12,13 @@ const Preview = () => {
     if (location.state?.name_of_file) {
       setFileName(location.state.name_of_file);
     }
-  }, [location.state, setFileName]);
+  }, [location.state?.name_of_file]);
 
   console.log(fileName);
-
+  console.log('Preview ResponseData:', responseData)
   return (
     <Layout>
-      <GenericTable data={responseData} csv_file_name={fileName} />
+      <GenericTable tdata={responseData} csv_file_name={fileName} />
     </Layout>
   );
 };

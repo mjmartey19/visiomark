@@ -7,40 +7,57 @@ import GenericBtn from '../common/components/button';
 import { z } from 'zod';
 import { zodResolver } from '@mantine/form';
 import { UserFormProvider, useUserForm } from '../common/form-context';
+import { useContext, useEffect } from 'react';
+import { appContext } from '../../utils/Context';
 
 const schema = z.object({
-  correct: z.number().min(1),
-  incorrect: z.number().min(0),
+  correct: z.preprocess((val) => Number(val), z.number().min(1)),
+  incorrect: z.preprocess((val) => Number(val), z.number()),
 });
 
 type SettingForm = z.infer<typeof schema>;
 
-
 const Settings = () => {
+  const { correct, incorrect, setCorrect, setIncorrect } = useContext(appContext);
+
   const form = useUserForm({
     validate: zodResolver(schema),
     initialValues: {
-      correct: 1,
-      incorrect: 0,
+      correct: correct ?? 1,  
+      incorrect: incorrect ?? 0, 
     },
   });
+
+  // Update form values when context values change
+  useEffect(() => {
+    form.setValues({ correct, incorrect });
+  }, [correct, incorrect]);
+
+  const handleSubmit = (values: SettingForm) => {
+    let correct = Number(values.correct)
+    let incorrect = Number(values.incorrect)
+    setCorrect(correct);
+    setIncorrect(incorrect);
+    console.log(correct, incorrect);
+  };
+
   return (
     <Layout>
-       <Text
-          c="#fff"
-          sx={{ fontFamily: 'Greycliff CF, sans-serif' }}
-          ta="left"
-          fz="2rem"
-          fw={700}
-        >
-          Advance Settings
+      <Text
+        c="#fff"
+        sx={{ fontFamily: 'Greycliff CF, sans-serif' }}
+        ta="left"
+        fz="2rem"
+        fw={700}
+      >
+        Advance Settings
       </Text>
-   
+
       <UserFormProvider form={form}>
-        <InputWrapper onSubmit={form.onSubmit((values:number) => console.log(values))}>
+        <InputWrapper onSubmit={form.onSubmit((values) => handleSubmit(values as SettingForm))}>
           <GenericInput
             val_name="correct"
-            placeholder= "0"
+            placeholder="0"
             label="Mark(s) per correct answer"
           />
           <GenericInput
@@ -48,47 +65,21 @@ const Settings = () => {
             placeholder="0"
             label="Mark(s) per incorrect answer"
           />
-          <GenericBtn type="submit" title="Update" 
-           sx={{
-            borderRadius: '20px',
-            color: THEME.colors.button.black,
-            width: '10rem',
-            background: '#fff',
-            '&:hover': {
-              background: THEME.colors.button.midnight_green,
-            },
-          }}
+          <GenericBtn
+            type="submit"
+            title="Update"
+            sx={{
+              borderRadius: '20px',
+              color: THEME.colors.button.black,
+              width: '10rem',
+              background: '#fff',
+              '&:hover': {
+                background: THEME.colors.button.midnight_green,
+              },
+            }}
           />
         </InputWrapper>
       </UserFormProvider>
-    </Layout>
-  );
-};
-
-
-
-const Setting = () => {
-  return (
-    <Layout>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          height: 'calc(100% - 64px)',
-        }}
-      >
-        <Text
-          c="#fff"
-          sx={{ fontFamily: 'Greycliff CF, sans-serif' }}
-          ta="left"
-          fz="2rem"
-          fw={700}
-        >
-          Advance Settings
-        </Text>
-
-       </div>
     </Layout>
   );
 };

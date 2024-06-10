@@ -10,15 +10,21 @@ import { schema } from '../schema';
 import { z } from 'zod';
 import { dialog } from '@tauri-apps/api';
 import { getFilenamesFromLocalStorage, storeToLocalStorage } from '../../../utils/helper';
+import { IAllData } from '../types';
 
 const useDashboard = () => {
-  const [all, setAll] = useState<{ [key: number]: string }>({});
+  // State management
+  const [all, setAll] = useState<IAllData>({});
   const [error, setError] = useState<boolean>(false);
   const [selectedFolder, setSelectedFolder] = useState<string | string[]>('');
+
+  // Convert selected folder path to a consistent format
   const folderPath = selectedFolder.toString().replace(/\\/g, '/');
-  const navigate = useNavigate();
+
+  // Context state management
   const { setResponseData, setForPreview } = useContext(appContext);
 
+  // Handle folder selection
   const handleFolderSelect = async () => {
     const result = await dialog.open({
       multiple: false,
@@ -28,14 +34,26 @@ const useDashboard = () => {
 
     if (result) {
       setSelectedFolder(result);
-      console.log(result)
+      // console.log(result)
     }
-    
+
   };
+  
+    // Helper function to create request body
+    const getChoicesForRequestBody = () => {
+      const choices: { [key: string]: string } = {};
+      Object.keys(all).forEach((key) => {
+        choices[key] = all[key].choice;
+      });
+      return choices;
+    };
 
+  const masterkeys = getChoicesForRequestBody();
 
+  // Mutation using react-query
   const mutate = useMutation({
     mutationFn: async (data: { [key: string]: string }) => {
+      console.log(all)
       try {
         const response = await fetch(`${Constants.API_URL}`, {
           method: 'POST',
@@ -47,19 +65,16 @@ const useDashboard = () => {
             no_of_questions: data['number_of_questions'],
             course_code: data['course_code'],
             department_code: data['department_code'],
-            master_key: { ...all },
+            master_key: { ...masterkeys },
           }),
         });
-
 
         if (!response.ok) {
           throw new Error('Network response was not ok.');
         }
 
         const responseData: [string, ITableDataProps[]] = await response.json();
-
         if (response.ok) {
-          
           storeToLocalStorage(responseData[0]);
           setResponseData(responseData[1]);
           setForPreview(true);
@@ -78,6 +93,8 @@ const useDashboard = () => {
       }
     },
   });
+
+  // Data validation
   const validateData = (data: any) => {
     try {
       schema.parse(data);

@@ -34,10 +34,6 @@ const routing = createBrowserRouter([
     element: <Settings />,
   },
   {
-    path: ROUTE.settings,
-    element: <Settings />,
-  },
-  {
     path: ROUTE.signIn,
     element: <SignIn/>,
   },

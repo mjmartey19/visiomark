@@ -141,17 +141,26 @@ function sortData(
   );
 }
 
-function GenericTable({ data, csv_file_name }: TableSortProps) {
+function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
   const theme = useMantineTheme();
   const [search, setSearch] = useState('');
-  const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState<keyof ITableDataProps | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const [metadata, setMetadata] = useState<MetadataType | null>(null);
   const [activeModalRow, setActiveModalRow] = useState<string | null>(null); // Track active modal row
+  const [data, setData] = useState<ITableDataProps[]>(tdata);
+  const [sortedData, setSortedData] = useState(data); // Initialize sortedData with data
+
+
+
+
+  useEffect(() => {
+    // Update sortedData whenever data changes
+    setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search }));
+  }, [data, sortBy, reverseSortDirection, search]);
 
   const fetchMetaData = async () => {
     try {
@@ -161,8 +170,6 @@ function GenericTable({ data, csv_file_name }: TableSortProps) {
       console.error('Error fetching metadata:', error);
     }
   };
-
-
 
   const setSorting = (field: keyof ITableDataProps) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -179,13 +186,18 @@ function GenericTable({ data, csv_file_name }: TableSortProps) {
     );
   };
 
-  const [rowOpenState, setRowOpenState] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-
   const handlePreview = (fileName: string) => {
     setActiveModalRow((prev) => (prev === fileName ? null : fileName)); // Toggle modal for the row
     fetchMetaData();
+  };
+
+  const handleCloseModal = () => {
+    setActiveModalRow(null);
+
+  };
+
+  const handleUpdateData = (updatedRow: ITableDataProps[]) => {
+    setData(updatedRow);
   };
 
   const rows = sortedData.map((row) => {
@@ -220,10 +232,12 @@ function GenericTable({ data, csv_file_name }: TableSortProps) {
           {activeModalRow === row.file_name && (
             <ModalPreview
               open={true}
-              close={() => handlePreview(row.file_name)}
+              close={handleCloseModal} // Use the new handleCloseModal function
               data={row}
+              updateData={handleUpdateData}
               image_dir={metadata?.image_dir}
               marking_scheme={metadata?.marking_scheme}
+              csv_file = {csv_file_name}
             />
           )}
         </td>

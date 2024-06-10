@@ -1,20 +1,66 @@
 import { Flex, Group, TextInput, Checkbox, rem } from '@mantine/core';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { THEME } from '../../appTheme';
+import { appContext } from '../../utils/Context';
+import useDashboard from '../dashboard/hook/useDashboard';
 
-const MasterKeyPage = ({
-  question_number,
-  all,
-  setAll,
-  index,
-}: {
+
+interface MasterKeyPageProps {
   question_number: number;
-  setAll: React.Dispatch<React.SetStateAction<{}>>;
-  all: { [key: number]: string };
   index: number;
-}) => {
+}
+
+
+const MasterKeyPage: React.FC<MasterKeyPageProps> = ({ question_number, index }) => {
   const [clicked, setClicked] = useState(false);
+  const { correct, incorrect } = useContext(appContext);
+  const [isBonus, setIsBonus] = useState<boolean>(false);
+
+  const {
+    all,
+    setAll
+  } = useDashboard();
+
+  useEffect(() => {
+    // Sync correct and incorrect values in the all object
+    setAll({
+      ...all,
+      [question_number]: {
+        ...all[question_number],
+        correct,
+        incorrect,
+        isBonus,
+      }
+    });
+  }, []);
+
+  console.log('all', all);
+  const handleCorrectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+    const value = parseInt(event.target.value);
+    setAll({
+      ...all,
+      [question_number]: {
+        ...all[question_number],
+        correct: value,
+        incorrect: incorrect
+      }
+    });
+  
+  };
+
+  const handleBonusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setIsBonus(checked);
+    setAll((prevAll) => ({
+      ...prevAll,
+      [question_number]: {
+        ...prevAll[question_number],
+        isBonus: checked,
+      },
+    }));
+  };
 
   return (
     <Flex
@@ -41,59 +87,32 @@ const MasterKeyPage = ({
             display: 'flex',
           }}
         >
-      <ChoiceStyles
-          clicked={all[question_number] === 'A'}
-          onClick={() => {
-            setAll({ ...all, [question_number]: 'A' });
-            setClicked(!clicked);
-          }}
-        >
-          A
-        </ChoiceStyles>
-        <ChoiceStyles
-          clicked={all[question_number] === 'B'}
-          onClick={() => {
-            setAll({ ...all, [question_number]: 'B' });
-            setClicked(true);
-          }}
-        >
-          B
-        </ChoiceStyles>
-        <ChoiceStyles
-          clicked={all[question_number] === 'C'}
-          onClick={() => {
-            setAll({ ...all, [question_number]: 'C' });
-            setClicked(true);
-          }}
-        >
-          C
-        </ChoiceStyles>
-        <ChoiceStyles
-          clicked={all[question_number] === 'D'}
-          onClick={() => {
-            setAll({ ...all, [question_number]: 'D' });
-            setClicked(true);
-          }}
-        >
-          D
-        </ChoiceStyles>
-        <ChoiceStyles
-          clicked={all[question_number] === 'E'}
-          onClick={() => {
-            setAll({ ...all, [question_number]: 'E' });
-            setClicked(true);
-          }}
-        >
-          E
-        </ChoiceStyles>
+       {['A', 'B', 'C', 'D', 'E'].map((choice) => (
+            <ChoiceStyles
+              key={choice}
+              clicked={all[question_number]?.choice === choice}
+              onClick={() => {
+                setAll({
+                  ...all,
+                  [question_number]: {
+                    ...all[question_number], // Spread existing data if any, or create a new object
+                    choice: choice, // Update the choice
+                  }
+                });
+                setClicked(true);
+              }}
+            >
+              {choice}
+            </ChoiceStyles>
+            ))}
         </div>
       </Group>
       <Group spacing='xl' style={{paddingLeft: '2rem'}}>
       <TextInput
           type="number"
           maxLength={1}
-          value={1}
-          
+          value={all[question_number]?.correct }
+          onChange={handleCorrectChange}
           styles={{
             input: {
               background: 'transparent',
@@ -106,10 +125,9 @@ const MasterKeyPage = ({
               justifyContent: 'center',
               borderRadius: '50%',
               '&:focus': {
-                  borderColor:'#fff'
-              }
+                borderColor: '#fff',
+              },
             },
-
             wrapper: {
               margin: '10px 0',
             },
@@ -119,11 +137,13 @@ const MasterKeyPage = ({
         {/* Checkbox for bonus */}
         <Checkbox
           label="Bonus"
+          checked={isBonus}
+          onChange={handleBonusChange}
           sx={{
             input: {
               background: 'transparent',
               border: `1px solid ${THEME.colors.background.jet}`,
-            }
+            },
           }}
         />
       </Group>
