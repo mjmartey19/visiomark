@@ -11,6 +11,8 @@ import { z } from 'zod';
 import { dialog } from '@tauri-apps/api';
 import { getFilenamesFromLocalStorage, storeToLocalStorage } from '../../../utils/helper';
 import { IAllData } from '../types';
+import { rem } from '@mantine/core';
+import { FiCheck } from 'react-icons/fi';
 
 const useDashboard = () => {
   // State management
@@ -20,7 +22,7 @@ const useDashboard = () => {
 
   // Convert selected folder path to a consistent format
   const folderPath = selectedFolder.toString().replace(/\\/g, '/');
-
+  
   // Context state management
   const { setResponseData, setForPreview } = useContext(appContext);
 
@@ -38,22 +40,11 @@ const useDashboard = () => {
     }
 
   };
-  
-    // Helper function to create request body
-    const getChoicesForRequestBody = () => {
-      const choices: { [key: string]: string } = {};
-      Object.keys(all).forEach((key) => {
-        choices[key] = all[key].choice;
-      });
-      return choices;
-    };
-
-  const masterkeys = getChoicesForRequestBody();
-
+ 
+  console.log(all)
   // Mutation using react-query
   const mutate = useMutation({
     mutationFn: async (data: { [key: string]: string }) => {
-      console.log(all)
       try {
         const response = await fetch(`${Constants.API_URL}`, {
           method: 'POST',
@@ -65,7 +56,7 @@ const useDashboard = () => {
             no_of_questions: data['number_of_questions'],
             course_code: data['course_code'],
             department_code: data['department_code'],
-            master_key: { ...masterkeys },
+            master_key: { ...all },
           }),
         });
 
@@ -78,12 +69,14 @@ const useDashboard = () => {
           storeToLocalStorage(responseData[0]);
           setResponseData(responseData[1]);
           setForPreview(true);
+
           AppAlert({
             title: 'Success',
-            color: `${THEME.colors.background.primary}`,
+            color: 'teal',
             message: 'Marked Successfully!! 😁',
-          });
-          window.location.reload();
+            });
+            
+            window.location.reload();
         }
 
         return responseData;

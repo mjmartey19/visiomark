@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { appContext } from './Context';
 import { BaseDirectory, readDir, readTextFile, removeDir, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
-import { MetadataType } from '../pages/common/components/types';
+import { MarkingSchemeType, MetadataType } from '../pages/common/components/types';
 
 
 export const readCSVFile = async ({
@@ -54,44 +54,43 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
     // Remove the first row (headers)
     metadataCsvData.shift();
 
-      // Function to split CSV row correctly
-      const splitCsvRow = (row: string) => {
-        const result = [];
-        let inQuotes = false;
-        let field = '';
+    // Function to split CSV row correctly
+    const splitCsvRow = (row: string) => {
+      const result = [];
+      let inQuotes = false;
+      let field = '';
   
-        for (let char of row) {
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
-            result.push(field);
-            field = '';
-          } else {
-            field += char;
-          }
+      for (let char of row) {
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(field);
+          field = '';
+        } else {
+          field += char;
         }
-        result.push(field);
-        return result;
-      };
-
+      }
+      result.push(field);
+      return result;
+    };
 
     const metadataData: MetadataType[] = metadataCsvData.map((row) => {
-      
-      const rowData = splitCsvRow(row)
-      // console.log(rowData);
-      let scheme: { [key: string]: string } = {};
+      const rowData = splitCsvRow(row);
+      let scheme: { [key: string]: any } = {};
       try {
         // Ensure the string is properly formatted as JSON
-        const jsonStr = rowData[6].replace(/'/g, '"'); // Replace single quotes with double quotes
+        const jsonStr = rowData[6]
+          .replace(/'/g, '"') // Replace single quotes with double quotes
+          .replace(/\bFalse\b/g, 'false') // Replace False with false
+          .replace(/\bTrue\b/g, 'true'); // Replace True with true
         scheme = JSON.parse(jsonStr);
-        // console.log(scheme);
       } catch (error) {
         console.error('Error parsing marking scheme:', error);
         console.error('Row data causing error:', rowData[6]);
       }
 
-      // Convert scheme to marking_scheme format
-      const marking_scheme: { [key: number]: string } = {};
+      // Convert scheme to MarkingSchemeType format
+      const marking_scheme: MarkingSchemeType = {};
       for (const key in scheme) {
         if (scheme.hasOwnProperty(key)) {
           const numKey = parseInt(key, 10);
@@ -102,6 +101,7 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
           }
         }
       }
+      console.log(marking_scheme)
       const item: MetadataType = {
         name_of_file: rowData[0],
         academic_year: rowData[1],
@@ -113,11 +113,9 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
       };
       return item;
     });
-    // console.log(metadataData);
-    // console.log(name_of_file)
+
     // Find the metadata corresponding to the file name
     const metadata = metadataData.find((metadataItem) => metadataItem.name_of_file === name_of_file);
-    // console.log(metadata)
     return metadata || null; // Return null if metadata is not found
   } catch (error) {
     console.log(error);
@@ -349,6 +347,18 @@ export function generateAcademicYears() {
   return years;
 }
 
+export const generateMarkingScheme = (markingScheme: MarkingSchemeType | undefined ): string[] => {
+  const choicesArray: string[] = [];
+  
+  for (const key in markingScheme) {
+    if (markingScheme.hasOwnProperty(key)) {
+      const question = markingScheme[Number(key)];
+      choicesArray[parseInt(key, 10) - 1] = question.choice; // Assuming the keys are 1-based index
+    }
+  }
+  
+  return choicesArray;
+};
 
 function shuffleArray(array: any[]) {
   for (let i = array.length - 1; i > 0; i--) {

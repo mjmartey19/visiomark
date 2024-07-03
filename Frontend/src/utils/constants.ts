@@ -3,8 +3,8 @@ export const Constants = {
   PATHS: {
     home: '/',
     signUp: '/signup',
-    signIn: '/signin',
-    browserLogin: '/login',
+    signIn: '/home',
+    browserLogin: '/browser-login',
     browserSignup: '/browser-signup',
     goBrowser: '/go-browser',
     openDesktop: '/open-desktop',

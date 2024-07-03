@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Request
 import pydantic
 from helpers.__pred_methods__ import multiprocessing_predictions, serial_predictions
 from helpers.dir_module import image_dir_to_array
@@ -10,6 +10,10 @@ import logging
 from helpers.utils import save_response_to_csv
 import shutil
 import datetime
+from fastapi.responses import HTMLResponse
+import requests
+import json
+
 
 
 app = FastAPI()
@@ -57,11 +61,12 @@ def copy_images_to_visioMark(image_dir: str, course_code: str):
 def read_root():
     return {"Hello": "World"}
     
-    
+
+
 @app.post("/predict")
 async def predict_score(ipm: ImageProcessingModel):
     # image_corruption_check(ipm.image_dir)
-    print(ipm.image_dir, ipm.no_of_questions, ipm.course_code, ipm.department_code)
+    print(ipm.image_dir, ipm.no_of_questions, ipm.course_code, ipm.department_code, ipm.master_key)
     
      # Validate the directory path
     if not os.path.isdir(ipm.image_dir):

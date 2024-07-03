@@ -4,12 +4,15 @@ import GenericBtn from '../common/components/button';
 import { Flex, Text } from '@mantine/core';
 import { THEME } from '../../appTheme';
 import { NavLink } from 'react-router-dom';
+import { open } from '@tauri-apps/api/shell';
+import { shell } from '@tauri-apps/api';
 
 
 const SignIn = () => {
-  const handleBrowserLogin = () => {
-    window.location.href = 'http://localhost:1420/login';
+  const handleBrowserLogin = async () => {
+    await shell.open('http://localhost:1420/browser-login');
   };
+
 
   return (
     <General>

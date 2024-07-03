@@ -11,7 +11,6 @@ import {
   Group,
   Loader,
   Stepper,
- 
   Text,
 } from '@mantine/core';
 import MasterKeyPage from '../master-key';
@@ -21,10 +20,11 @@ import useDashboard from './hook/useDashboard';
 const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   const [active, setActive] = useState<number>(0);
   const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true); // State to manage next button disable
-  
   const {
     handleFolderSelect,
     mutate,
+    all, 
+    setAll,
     selectedFolder,
     validateData,
   } = useDashboard();
@@ -37,6 +37,8 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
       divs.push(
         <MasterKeyPage
           key={i}
+          all={all}
+          setAll={setAll}
           index={i}
           question_number={i}
         />

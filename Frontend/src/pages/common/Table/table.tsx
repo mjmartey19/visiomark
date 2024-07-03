@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import { keys } from '@mantine/utils';
 import { ITableDataProps, TableSortProps, ThProps } from './types';
-import { BiChevronDown, BiChevronUp, BiSearch } from 'react-icons/bi';
+import {  BiChevronDown, BiChevronUp, BiSearch } from 'react-icons/bi';
 import { HiSelector } from 'react-icons/hi';
 import styled from 'styled-components';
 import { appContext } from '../../../utils/Context';
@@ -24,6 +24,8 @@ import { useDisclosure } from '@mantine/hooks';
 import ModalComp from '../Modal/Modal';
 import ModalPreview from '../../file-preview/ModalPreview';
 import { MetadataType } from '../components/types';
+import AppAlert from '../notification/alert';
+import { FiCheck } from 'react-icons/fi';
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -148,7 +150,6 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<keyof ITableDataProps | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [opened, { open, close }] = useDisclosure(false);
   const [metadata, setMetadata] = useState<MetadataType | null>(null);
   const [activeModalRow, setActiveModalRow] = useState<string | null>(null); // Track active modal row
   const [data, setData] = useState<ITableDataProps[]>(tdata);
@@ -160,6 +161,8 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   useEffect(() => {
     // Update sortedData whenever data changes
     setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search }));
+   // Call the AppAlert function with the success notification and icon
+
   }, [data, sortBy, reverseSortDirection, search]);
 
   const fetchMetaData = async () => {
@@ -232,7 +235,7 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
           {activeModalRow === row.file_name && (
             <ModalPreview
               open={true}
-              close={handleCloseModal} // Use the new handleCloseModal function
+              close={handleCloseModal} 
               data={row}
               updateData={handleUpdateData}
               image_dir={metadata?.image_dir}

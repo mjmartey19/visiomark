@@ -7,6 +7,9 @@ import { ITableDataProps } from '../common/Table/types';
 import { BaseDirectory, readBinaryFile, writeFile } from '@tauri-apps/api/fs';
 import { CiEdit } from "react-icons/ci";
 import { appContext } from '../../utils/Context';
+import { MarkingSchemeType } from '../common/components/types';
+import { generateMarkingScheme } from '../../utils/helper';
+
 
 interface ModalPreviewProps {
   open: boolean;
@@ -14,7 +17,7 @@ interface ModalPreviewProps {
   data: ITableDataProps;
   updateData: (updatedData: ITableDataProps[]) => void;
   image_dir: string | undefined;
-  marking_scheme: { [key: number]: string } | undefined;
+  marking_scheme: MarkingSchemeType | undefined;
   csv_file: string | undefined;
 }
 
@@ -99,8 +102,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const [result, setResult] = useState<{ answer: string; color: string }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
-//   console.log('Marking Scheme');
-// console.log(marking_scheme)
+
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
       const image_path = `VisioMark\\exam_sheets\\${image_dir.trim()}\\${data.file_name.trim()}`;
@@ -124,8 +126,8 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
 
   useEffect(() => {
 
-    const markingScheme: string[] = generateMarkingScheme();
-    //console.log('Marking Scheme');
+    const markingScheme: string[] = generateMarkingScheme(marking_scheme);
+    // console.log('Marking Scheme');
     // console.log(markingScheme);
     const studentAnswers: string[] = data.predictions.split(',').map(ans => ans.trim());
     // console.log('Student Answers');
@@ -136,12 +138,6 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   
   }, [data.predictions, marking_scheme]);
 
-  const generateMarkingScheme = (): string[] => {
-    if (marking_scheme) {
-      return Object.values(marking_scheme);
-    }
-    return [];
-  };
 
   const compareAnswers = (
     studentAnswers: string[],
@@ -151,7 +147,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
     for (let i: number = 0; i < studentAnswers.length; i++) {
       const studentAnswer = studentAnswers[i];
       const correctAnswer = markingScheme[i];
-      if (studentAnswer && correctAnswer && studentAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+      if (studentAnswer == correctAnswer) {
         result.push({ answer: studentAnswer, color: '#006D32' });
       } else {
         result.push({ answer: studentAnswer, color: 'red' });
@@ -252,7 +248,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   
   const calculateNewScore = (updatedAnswers: string[]): number => {
     let score = 0;
-    const markingScheme: string[] = generateMarkingScheme();
+    const markingScheme: string[] = generateMarkingScheme(marking_scheme);
     for (let i = 0; i < updatedAnswers.length; i++) {
       if (updatedAnswers[i].toLowerCase() === markingScheme[i].toLowerCase()) {
         score += 1;
@@ -268,7 +264,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
         answer: editedAnswers[i],
         color:
           editedAnswers[i].toLowerCase() ===
-          generateMarkingScheme()[(page - 1) * answersPerPage + i].toLowerCase()
+          generateMarkingScheme(marking_scheme)[(page - 1) * answersPerPage + i].toLowerCase()
             ? '#006D32'
             : 'red',
       };

@@ -50,8 +50,8 @@ const AppProvider = ({ children }: { children: ReactNode }) => {
   const [responseData, setResponseData] = usePersistentState<ResponseData>('responseData', []);
   const [forPreview, setForPreview] = useState(false);
   const [fileName, setFileName] = usePersistentState<string>('fileName', '');
-  const [correct, setCorrect] = usePersistentState<number>('correct', 1);
-  const [incorrect, setIncorrect] = usePersistentState<number>('incorrect', 0);
+  const [correct, setCorrect] = useState<number>(1);
+  const [incorrect, setIncorrect] = useState<number>(0);
 
   const value = {
     responseData,
