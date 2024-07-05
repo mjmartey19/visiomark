@@ -73,9 +73,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </RequestBtn>
 
           <GenericBtn
-            tooltip="Help"
+            tooltip=""
             type="button"
-            title="Help"
+            title="Notification(0)"
             sx={{
               fontSize: '0.8rem',
               borderRadius: '20px',

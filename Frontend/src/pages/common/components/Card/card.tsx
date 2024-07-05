@@ -123,7 +123,7 @@ const SharedCard = ({
                 gap: '1rem',
               }}
             >
-              {moment(metadata?.createdAt ).fromNow()}
+              Marked {moment(metadata?.createdAt ).fromNow()}
             </Text>
           </div>
         </div>

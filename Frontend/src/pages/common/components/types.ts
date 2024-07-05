@@ -7,6 +7,7 @@ export type GenericInputProps = {
   description?: string;
   val_name: string;
   type?: React.HTMLInputTypeAttribute;
+  accept?: string;
   data?: readonly (string | SelectItem)[];
 };
 

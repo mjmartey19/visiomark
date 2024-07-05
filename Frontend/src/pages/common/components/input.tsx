@@ -8,6 +8,7 @@ const GenericInput = ({
   label,
   val_name,
   type,
+  accept,
 }: GenericInputProps) => {
   const form = useUserFormContext();
 

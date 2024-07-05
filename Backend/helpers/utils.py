@@ -32,8 +32,8 @@ def index_to_label(index: int):
         2: 'C', 
         3: 'D', 
         4: 'E',
-        5: 'Double',
-        6: ''
+        5: '',
+        6: 'Exceptions',
     }
     return shading.get(index, f"wrong index {index}")
 

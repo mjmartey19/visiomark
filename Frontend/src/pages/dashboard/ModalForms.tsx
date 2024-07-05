@@ -5,29 +5,83 @@ import { KeyheadStyles, LoaderWrapper, ModalInputs, Title } from './styles';
 import GenericInput from '../common/components/input';
 import GenericBtn from '../common/components/button';
 import { THEME } from '../../appTheme';
-import { useEffect, useState } from 'react';
-
-import {
-  Group,
-  Loader,
-  Stepper,
-  Text,
-} from '@mantine/core';
+import { useContext, useEffect, useState } from 'react';
+import { readBinaryFile } from '@tauri-apps/api/fs';
+import { Group, Loader, Stepper, Text } from '@mantine/core';
 import MasterKeyPage from '../master-key';
 import { schema } from './schema';
 import useDashboard from './hook/useDashboard';
+import { dialog } from '@tauri-apps/api';
+import * as XLSX from 'xlsx';
+import { appContext } from '../../utils/Context';
+import { IAllData } from './types';
+
+interface MarkingSchemeData {
+  choice: string;
+  marks: number;
+  bonus: number;
+}
 
 const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   const [active, setActive] = useState<number>(0);
+
+
   const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true); // State to manage next button disable
+
   const {
     handleFolderSelect,
     mutate,
-    all, 
+    all,
     setAll,
     selectedFolder,
     validateData,
   } = useDashboard();
+
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const { incorrect } = useContext(appContext);
+
+  async function handleMarkingSchemeFile() {
+    const markingSchemeFile = await dialog.open({
+      multiple: false,
+      filters: [
+        {
+          name: 'File',
+          extensions: ['xlsx'],
+        },
+      ],
+      directory: false,
+      title: 'Select Marking Scheme',
+    });
+
+    if (typeof markingSchemeFile === 'string') {
+      setSelectedFile(markingSchemeFile);
+      const filePath = markingSchemeFile;
+
+      // Read the file using Tauri's filesystem API
+      const arrayBuffer = await readBinaryFile(filePath);
+      console.log(arrayBuffer);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+      // Assuming the data is in the first sheet
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+      console.log(jsonData);	
+      // Extract the required data format: choice, marks, bonus
+      const formattedData: IAllData = {};
+      jsonData.forEach((row, index) => {
+        formattedData[row.__rowNum__] = {
+          choice: row.Choice || '',
+          correct: row.Marks,
+          incorrect: incorrect,
+          isBonus: row.Bonus 
+        };
+      });
+
+      setAll(formattedData);
+      console.log(formattedData);
+    }
+  }
 
   function DisplayDivMultipleTimes() {
     const divs = [];
@@ -48,6 +102,8 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     return <>{divs}</>;
   }
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {};
+
   const form: UseFormReturnType<any, (values: any) => typeof schema> =
     useUserForm({
       validate: zodResolver(schema),
@@ -59,38 +115,37 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
       },
     });
 
-    useEffect(() => {
-      const currentStepInputs = getCurrentStepInputs();
-      setIsNextDisabled(!currentStepInputs.every(val => val));
-    }, [active, form.values, selectedFolder]); 
-    
-  
-    const getCurrentStepInputs = () : (string | undefined)[] => {
-      switch (active) {
-        case 0:
-          return [form.values.course_code, form.values.department_code];
-        case 1:
-          return [form.values.number_of_questions, selectedFolder];
-        default:
-          return [];
-      }
-    };
-  
-    const nextStep = () => {
-      if (!isNextDisabled) {
-        setActive((current) => (current < 2 ? current + 1 : current));
-      }
-    };
-  
-    const prevStep = () =>
-      setActive((current) => (current > 0 ? current - 1 : current));
+  useEffect(() => {
+    const currentStepInputs = getCurrentStepInputs();
+    setIsNextDisabled(!currentStepInputs.every((val) => val));
+  }, [active, form.values, selectedFolder]);
+
+  const getCurrentStepInputs = (): (string | undefined)[] => {
+    switch (active) {
+      case 0:
+        return [form.values.course_code, form.values.department_code];
+      case 1:
+        return [form.values.number_of_questions, selectedFolder];
+      default:
+        return [];
+    }
+  };
+
+  const nextStep = () => {
+    if (!isNextDisabled) {
+      setActive((current) => (current < 2 ? current + 1 : current));
+    }
+  };
+
+  const prevStep = () =>
+    setActive((current) => (current > 0 ? current - 1 : current));
 
   return (
     <>
       <ModalComp opened={open} close={close}>
         {mutate.isLoading ? (
           <LoaderWrapper>
-           <Loader size="70" color="#fff" type="bars" />
+            <Loader size="70" color="#fff" type="bars" />
             <p>Good things take time!!</p>
           </LoaderWrapper>
         ) : (
@@ -105,7 +160,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
               >
                 <Stepper.Step>
                   <ModalInputs>
-                   
                     <GenericInput
                       {...form.getInputProps('course_code')}
                       placeholder="COE 343"
@@ -128,7 +182,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       val_name="number_of_questions"
                       label="Total count of questions"
                     />
-                    
+
                     <GenericBtn
                       title="Select Folder"
                       onClick={handleFolderSelect}
@@ -160,52 +214,93 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                   </ModalInputs>
                 </Stepper.Step>
                 <Stepper.Completed>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      width: '90%'
-                    }}
-                  >
-                    <KeyheadStyles>Select the correct answers</KeyheadStyles>
-                    <Group
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: '1rem',
-                        alignItems: 'center',
+                  <div>
+                    <GenericBtn
+                      title="Upload Marking Scheme"
+                      onClick={handleMarkingSchemeFile}
+                      type="button"
+                      sx={{
+                        height: '2.5rem',
+                        width: '100%',
+                        fontSize: '1rem',
+                        background: '#fff',
+                        borderRadius: '10px',
+                        color: `${THEME.colors.background.black}`,
+
+                        '&:hover': {
+                          background: THEME.colors.button.midnight_green,
+                        },
                       }}
-                    >
+                    />
+                    {selectedFile && (
                       <Text
                         c={THEME.colors.text.primary}
-                        sx={{
-                          fontFamily: 'poppins, sans-serif',
-                          textDecoration: 'underline',
-                        }}
+                        sx={{ fontFamily: 'poppins, sans-serif' }}
                         ta="center"
                         fz="0.8rem"
                         fw={500}
                       >
-                        Mark(s)
+                        {selectedFile}
                       </Text>
-                      <Text
-                        c={THEME.colors.text.primary}
-                        sx={{
-                          fontFamily: 'poppins, sans-serif',
-                          textDecoration: 'underline',
-                        }}
-                        
-                        ta="center"
-                        fz="0.8rem"
-                        fw={500}
-                      >
-                        Bonus
-                      </Text>
-                    </Group>
+                    )}
                   </div>
 
-                  <DisplayDivMultipleTimes />
+                  {!selectedFile && (
+                    <div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          width: '90%',
+                        }}
+                      >
+                        <div
+                          style={{ textAlign: 'center', paddingTop: '1rem' }}
+                        >
+                          OR
+                        </div>
+                        <KeyheadStyles>
+                          Select the correct answers
+                        </KeyheadStyles>
+                        <Group
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: '1rem',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Text
+                            c={THEME.colors.text.primary}
+                            sx={{
+                              fontFamily: 'poppins, sans-serif',
+                              textDecoration: 'underline',
+                            }}
+                            ta="center"
+                            fz="0.8rem"
+                            fw={500}
+                          >
+                            Mark(s)
+                          </Text>
+                          <Text
+                            c={THEME.colors.text.primary}
+                            sx={{
+                              fontFamily: 'poppins, sans-serif',
+                              textDecoration: 'underline',
+                            }}
+                            ta="center"
+                            fz="0.8rem"
+                            fw={500}
+                          >
+                            Bonus
+                          </Text>
+                        </Group>
+                      </div>
+
+                      <DisplayDivMultipleTimes />
+                    </div>
+                  )}
                 </Stepper.Completed>
               </Stepper>
 
@@ -240,7 +335,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                     title="Next"
                     type="button"
                     onClick={nextStep}
-                    
                     sx={{
                       fontSize: '0.8rem',
                       borderRadius: '20px',

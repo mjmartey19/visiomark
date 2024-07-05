@@ -17,11 +17,11 @@ const MasterKeyPage: React.FC<MasterKeyPageProps> = ({ question_number, index, a
   const { correct, incorrect } = useContext(appContext);
   const initialCorrect = all[question_number]?.correct?.toString() || '';
   const initialIsBonus = all[question_number]?.isBonus || false;
-  const initialChoices = all[question_number]?.choice.split('') || [];
+  const initialChoice = all[question_number]?.choice || '';
 
   const [customCorrect, setCustomCorrect] = useState<string>(initialCorrect);
   const [isBonus, setIsBonus] = useState<boolean>(initialIsBonus);
-  const [selectedChoices, setSelectedChoices] = useState<string[]>(initialChoices);
+  const [selectedChoice, setSelectedChoice] = useState<string>(initialChoice);
   const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
@@ -32,11 +32,11 @@ const MasterKeyPage: React.FC<MasterKeyPageProps> = ({ question_number, index, a
           correct: correct,
           incorrect,
           isBonus,
-          choice: selectedChoices.join(''),
+          choice: selectedChoice,
         },
       }));
     }
-  }, [all, correct, incorrect, isBonus, question_number, selectedChoices, setAll]);
+  }, [all, correct, incorrect, isBonus, question_number, selectedChoice, setAll]);
 
   const handleCorrectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -66,18 +66,12 @@ const MasterKeyPage: React.FC<MasterKeyPageProps> = ({ question_number, index, a
   };
 
   const handleChoiceClick = (choice: string) => {
-    let updatedChoices;
-    if (selectedChoices.includes(choice)) {
-      updatedChoices = selectedChoices.filter((c) => c !== choice);
-    } else {
-      updatedChoices = [...selectedChoices, choice];
-    }
-    setSelectedChoices(updatedChoices);
+    setSelectedChoice(choice);
     setAll((prevState) => ({
       ...prevState,
       [question_number]: {
         ...prevState[question_number],
-        choice: updatedChoices.join(''),
+        choice: choice,
       },
     }));
     setClicked(true);
@@ -111,7 +105,7 @@ const MasterKeyPage: React.FC<MasterKeyPageProps> = ({ question_number, index, a
           {['A', 'B', 'C', 'D', 'E'].map((choice) => (
             <ChoiceStyles
               key={choice}
-              clicked={selectedChoices.includes(choice)}
+              clicked={selectedChoice === choice}
               onClick={() => handleChoiceClick(choice)}
             >
               {choice}
