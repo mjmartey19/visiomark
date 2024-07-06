@@ -96,6 +96,7 @@ const useDashboard = () => {
       if (error instanceof z.ZodError) {
         setError(true);
         console.error('Validation error:', error);
+        alert('Invalid Field, Please Check Field')
       }
     }
   };

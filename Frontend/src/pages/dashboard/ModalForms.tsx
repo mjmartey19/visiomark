@@ -80,7 +80,11 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
 
       setAll(formattedData);
       console.log(formattedData);
+
+      setMarkingSchemeLength(Object.keys(formattedData).length);
+      console.log(Object.keys(formattedData).length);
     }
+    
   }
 
 
@@ -105,14 +109,14 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   }
 
   const handleSubmit = (values: any) => {
-    setMarkingSchemeLength(Object.keys(all).length);
-    console.log(markingSchemeLength);
+    console.log(markingSchemeLength); 
     console.log(parseInt(values.number_of_questions))
     if (parseInt(values.number_of_questions) !== markingSchemeLength) {
       alert("The number of questions does not match the length of the uploaded file data.");
       return;
     }
-    validateData(values);
+   
+    mutate.mutate(values);
   };
 
   const form: UseFormReturnType<any, (values: any) => typeof schema> =
@@ -162,7 +166,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
         ) : (
           <UserFormProvider form={form}>
             {/* @ts-ignore */}
-            <form onSubmit={form.onSubmit((value) => mutate.mutate(value))}>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
               <Stepper
                 active={active}
                 onStepClick={setActive}
@@ -365,7 +369,10 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                   <GenericBtn
                     title="Done"
                     type="submit"
-                    onClick={() => handleSubmit(form.values)}
+                    onClick={() => {
+                      validateData(form.values)
+                      handleSubmit(form.values)
+                    }}
                     sx={{
                       fontSize: '0.8rem',
                       borderRadius: '20px',
