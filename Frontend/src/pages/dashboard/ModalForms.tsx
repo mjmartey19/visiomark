@@ -24,10 +24,9 @@ interface MarkingSchemeData {
 
 const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   const [active, setActive] = useState<number>(0);
-
-
+  
   const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true); // State to manage next button disable
-
+  
   const {
     handleFolderSelect,
     mutate,
@@ -36,9 +35,10 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     selectedFolder,
     validateData,
   } = useDashboard();
-
+  
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { incorrect } = useContext(appContext);
+  const [markingSchemeLength, setMarkingSchemeLength] = useState<number>()
 
   async function handleMarkingSchemeFile() {
     const markingSchemeFile = await dialog.open({
@@ -83,6 +83,8 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     }
   }
 
+
+
   function DisplayDivMultipleTimes() {
     const divs = [];
 
@@ -102,7 +104,16 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     return <>{divs}</>;
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {};
+  const handleSubmit = (values: any) => {
+    setMarkingSchemeLength(Object.keys(all).length);
+    console.log(markingSchemeLength);
+    console.log(parseInt(values.number_of_questions))
+    if (parseInt(values.number_of_questions) !== markingSchemeLength) {
+      alert("The number of questions does not match the length of the uploaded file data.");
+      return;
+    }
+    validateData(values);
+  };
 
   const form: UseFormReturnType<any, (values: any) => typeof schema> =
     useUserForm({
@@ -354,7 +365,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                   <GenericBtn
                     title="Done"
                     type="submit"
-                    onClick={() => validateData(form.values)}
+                    onClick={() => handleSubmit(form.values)}
                     sx={{
                       fontSize: '0.8rem',
                       borderRadius: '20px',

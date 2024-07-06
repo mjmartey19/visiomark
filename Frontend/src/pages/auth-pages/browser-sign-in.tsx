@@ -11,21 +11,21 @@ const BrowserLogin = () => {
 
   const handleGoogleLogin = (response:any) => {
     // Handle Google login response
-    const profile = response.profileObj;
-    const userInfo = {
-      fullName: profile.name,
-      profilePic: profile.imageUrl,
-    };
-    console.log(userInfo)
-    // Save userInfo to localStorage or context/state
-    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-    // Redirect to GoToDesktop page
-    navigate('/go-to-desktop');
+    // const profile = response.profileObj;
+    // const userInfo = {
+    //   fullName: profile.name,
+    //   profilePic: profile.imageUrl,
+    // };
+    // console.log(userInfo)
+    // // Save userInfo to localStorage or context/state
+    // localStorage.setItem('userInfo', JSON.stringify(userInfo));
+    // // Redirect to GoToDesktop page
+    // navigate('/go-to-desktop');
   };
 
-  const handleLoginFailure = (response:any) => {
-    console.log('Login failed:', response);
-  };
+  // const handleLoginFailure = (response:any) => {
+  //   console.log('Login failed:', response);
+  // };
 
   return (
     <General>

@@ -1,33 +1,16 @@
-use tauri::{Manager, CustomMenuItem, Menu, Submenu};
-use tauri::api::shell::open;
-use std::sync::{Arc, Mutex};
-use tauri::State;
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[tauri::command]
-fn open_browser(app: tauri::AppHandle, url: String) {
-    let shell_scope = app.shell_scope();
-    open(&shell_scope, &url, None).expect("Failed to open browser");
-}
+// use tauri::api::dialog;
 
-#[tauri::command]
-fn handle_oauth_response(state: State<'_, AppState>, data: String) {
-    let mut state = state.0.lock().unwrap();
-    state.user_info = Some(data);
-    println!("OAuth response: {}", state.user_info.as_ref().unwrap());
-}
-
-struct AppState(Arc<Mutex<StateData>>);
-
-struct StateData {
-    user_info: Option<String>,
-}
+// fn open_folder_dialog() -> String {
+//     let result = dialog::open().directory().show_directories_only(true).run()?;
+//     Ok(result)
+// }
 
 fn main() {
-    let state = AppState(Arc::new(Mutex::new(StateData { user_info: None })));
-    
     tauri::Builder::default()
-        .manage(state)
-        .invoke_handler(tauri::generate_handler![open_browser, handle_oauth_response])
+        // .invoke_handler(tauri::generate_handler![open_folder_dialog])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -10,7 +10,7 @@ import { shell } from '@tauri-apps/api';
 
 const SignIn = () => {
   const handleBrowserLogin = async () => {
-    await shell.open('http://localhost:1420/browser-login');
+    // await shell.open('http://localhost:1420/browser-login');
   };
 
 
