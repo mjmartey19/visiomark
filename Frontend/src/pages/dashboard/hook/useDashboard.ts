@@ -87,19 +87,19 @@ const useDashboard = () => {
     },
   });
 
-  // Data validation
   const validateData = (data: any) => {
     try {
       schema.parse(data);
-      setError(false);
+      return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setError(true);
         console.error('Validation error:', error);
-        alert('Invalid Field, Please Check Field')
+        alert('Invalid Or Empty Field(s), Please make sure all fields are valid or not empty');
       }
+      return false;
     }
   };
+
 
   return {
     all,
@@ -107,6 +107,7 @@ const useDashboard = () => {
     handleFolderSelect,
     mutate,
     selectedFolder,
+    error,
     validateData,
     getFilenamesFromLocalStorage,
   };

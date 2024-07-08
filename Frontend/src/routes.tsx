@@ -10,9 +10,9 @@ import BrowserLogin from './pages/auth-pages/browser-sign-in';
 import Preview from './pages/file-preview';
 import Statistics from './pages/file-preview/analytics/statistics';
 import BrowserSignup from './pages/auth-pages/browser-sign-up';
-import GoBrowser from './pages/auth-pages/go-to-browser';
-import OpenDesktop from './pages/auth-pages/open-desktop';
-import ConnectionError from './pages/auth-pages/connection-error';
+
+
+
 
 const ROUTE = Constants.PATHS;
 
@@ -22,8 +22,8 @@ const routing = createBrowserRouter([
     element: <Dashboard />,
   },
   {
-    path: ROUTE.signUp,
-    element: <SignUp />,
+    path: ROUTE.browserSignup,
+    element: <BrowserSignup />,
   },
   {
     path: ROUTE.allfiles,
@@ -45,18 +45,7 @@ const routing = createBrowserRouter([
     path: ROUTE.browserSignup,
     element: <BrowserSignup />,
   },
-  {
-    path: ROUTE.goBrowser,
-    element: <GoBrowser />,
-  },
-  {
-    path: ROUTE.openDesktop,
-    element: <OpenDesktop />,
-  },
-  {
-    path: ROUTE.connectionError,
-    element: <ConnectionError />,
-  },
+
   
 
   {

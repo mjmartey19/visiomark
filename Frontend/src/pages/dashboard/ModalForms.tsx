@@ -38,7 +38,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { incorrect } = useContext(appContext);
-  const [markingSchemeLength, setMarkingSchemeLength] = useState<number>()
+  const [markingSchemeLength, setMarkingSchemeLength] = useState<number>(0)
 
   async function handleMarkingSchemeFile() {
     const markingSchemeFile = await dialog.open({
@@ -110,12 +110,20 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
 
   const handleSubmit = (values: any) => {
     console.log(markingSchemeLength); 
-    console.log(parseInt(values.number_of_questions))
-    if (parseInt(values.number_of_questions) !== markingSchemeLength) {
-      alert("The number of questions does not match the length of the uploaded file data.");
+    console.log(parseInt(values.number_of_questions));
+    
+    const isValid = validateData(form.values);
+    if (!isValid) {
       return;
     }
-   
+    
+    if (markingSchemeLength !== 0) {
+      if (parseInt(values.number_of_questions) !== markingSchemeLength) {
+        alert("The number of questions does not match the length of the uploaded file data.");
+        return;
+      }
+    }
+  
     mutate.mutate(values);
   };
 
@@ -166,7 +174,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
         ) : (
           <UserFormProvider form={form}>
             {/* @ts-ignore */}
-            <form onSubmit={form.onSubmit(handleSubmit)}>
+            <form onSubmit={form.onSubmit((value) => mutate.mutate(value))}>
               <Stepper
                 active={active}
                 onStepClick={setActive}
@@ -369,10 +377,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                   <GenericBtn
                     title="Done"
                     type="submit"
-                    onClick={() => {
-                      validateData(form.values)
-                      handleSubmit(form.values)
-                    }}
+                    onClick={() => validateData(form.values)}
                     sx={{
                       fontSize: '0.8rem',
                       borderRadius: '20px',
