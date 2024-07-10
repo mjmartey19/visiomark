@@ -90,13 +90,15 @@ const useDashboard = () => {
   const validateData = (data: any) => {
     try {
       schema.parse(data);
-      return true;
+      setError(false);
+      return true; // Return true if validation passes
     } catch (error) {
       if (error instanceof z.ZodError) {
+        setError(true);
         console.error('Validation error:', error);
         alert('Invalid Or Empty Field(s), Please make sure all fields are valid or not empty');
       }
-      return false;
+      return false; // Return false if validation fails
     }
   };
 
