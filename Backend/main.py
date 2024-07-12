@@ -60,7 +60,7 @@ def copy_images_to_visioMark(image_dir: str, course_code: str):
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-    
+    git 
 
 
 @app.post("/predict")
