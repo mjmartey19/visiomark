@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import { keys } from '@mantine/utils';
 import { ITableDataProps, TableSortProps, ThProps } from './types';
-import {  BiChevronDown, BiChevronUp, BiSearch } from 'react-icons/bi';
+import { BiChevronDown, BiChevronUp, BiSearch } from 'react-icons/bi';
 import { HiSelector } from 'react-icons/hi';
 import styled from 'styled-components';
 import { appContext } from '../../../utils/Context';
@@ -143,6 +143,10 @@ function sortData(
   );
 }
 
+function calculateExceptions(predictions: string) {
+  return (predictions.match(/Exception/g) || []).length;
+}
+
 function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
@@ -155,14 +159,11 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   const [data, setData] = useState<ITableDataProps[]>(tdata);
   const [sortedData, setSortedData] = useState(data); // Initialize sortedData with data
 
-
-
-
   useEffect(() => {
     // Update sortedData whenever data changes
-    setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search }));
-   // Call the AppAlert function with the success notification and icon
-
+    setSortedData(
+      sortData(data, { sortBy, reversed: reverseSortDirection, search })
+    );
   }, [data, sortBy, reverseSortDirection, search]);
 
   const fetchMetaData = async () => {
@@ -196,7 +197,6 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
 
   const handleCloseModal = () => {
     setActiveModalRow(null);
-
   };
 
   const handleUpdateData = (updatedRow: ITableDataProps[]) => {
@@ -204,6 +204,7 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   };
 
   const rows = sortedData.map((row) => {
+    const exceptions = calculateExceptions(row.predictions);
     return (
       <tr key={row.file_name}>
         <td>{row['index number']}</td>
@@ -221,26 +222,40 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
             {row.score}
           </Text>
         </td>
-        <td style={{ paddingLeft: '7rem' }}>
+        <td>
+          <Text
+            sx={{
+              background: `${exceptions === 0 ? 'green' : 'red'}`,
+              padding: '0.4rem',
+              width: '2rem',
+              textAlign: 'center',
+              borderRadius: '2rem',   
+              marginLeft: '3rem',
+            }}
+          >
+            {exceptions}
+          </Text>
+        </td>
+
+        <td>
           <FaEye
             size={20}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer',  marginLeft: '3rem'  }}
             color={THEME.colors.text.primary}
             onClick={() => {
               handlePreview(row.file_name);
               fetchMetaData();
             }}
           />
-
           {activeModalRow === row.file_name && (
             <ModalPreview
               open={true}
-              close={handleCloseModal} 
+              close={handleCloseModal}
               data={row}
               updateData={handleUpdateData}
               image_dir={metadata?.image_dir}
               marking_scheme={metadata?.marking_scheme}
-              csv_file = {csv_file_name}
+              csv_file={csv_file_name}
             />
           )}
         </td>
@@ -316,7 +331,6 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
             >
               Index Number
             </Th>
-
             <Th
               sorted={sortBy === 'predictions'}
               reversed={reverseSortDirection}
@@ -324,7 +338,6 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
             >
               Student Answers
             </Th>
-
             <Th
               sorted={sortBy === 'score'}
               reversed={reverseSortDirection}
@@ -333,11 +346,18 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
               <Text style={{ paddingLeft: '3rem' }}>Score</Text>
             </Th>
             <Th
+              sorted={sortBy === 'exceptions'}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting('exceptions')}
+            >
+              <Text style={{ paddingLeft: '2rem' }}>Exceptions</Text>
+            </Th>
+            <Th
               sorted={sortBy === 'file_name'}
               reversed={reverseSortDirection}
               onSort={() => setSorting('file_name')}
             >
-              <Text style={{ paddingLeft: '6rem' }}>Preview</Text>
+              <Text style={{ paddingLeft: '2rem' }}>Preview</Text>
             </Th>
           </tr>
         </thead>
