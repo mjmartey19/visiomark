@@ -94,3 +94,15 @@ async def predict_score(ipm: ImageProcessingModel):
     
     return [ csv_file, response ]
 
+class UserInfoModel(pydantic.BaseModel):
+    access_token : str
+
+@app.post("/auth/userinfo")
+async def user_info(request: Request):
+    data = await request.json()
+    print(data)
+
+    response = requests.get(f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={data['access_token']}")
+    
+    print(response.json())
+    return response.json() 

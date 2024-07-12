@@ -1,14 +1,11 @@
 export const Constants = {
   API_URL: 'http://127.0.0.1:8000/predict',
   PATHS: {
-    home: '/',
-    signUp: '/signup',
-    signIn: '/home',
+    home: '/home',
+    signIn: '/',
     browserLogin: '/browser-login',
-    browserSignup: '/browser-signup',
-    goBrowser: '/go-browser',
-    openDesktop: '/open-desktop',
-    connectionError: '/connection-error',
+    browserSignup: '/signup',
+
     settings: '/settings',
     allfiles: '/allfiles',
     preview: '/preview',

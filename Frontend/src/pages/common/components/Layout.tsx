@@ -30,12 +30,21 @@ import GenericBtn from './button';
 import Modalforms from '../../dashboard/ModalForms';
 import { RequestBtn } from '../../dashboard/styles';
 import { useDisclosure } from '@mantine/hooks';
+import NotificationModal from '../notification/notification';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { tabValue } = useParams();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [opened, { open, close }] = useDisclosure(false);
+
+  const downloadTemplate = () => {
+    const link = document.createElement('a');
+    link.href = 'src/assets/MarkingSchemeTemplate.xlsx';
+    link.download = 'MarkingSchemeTemplate.xlsx';
+    link.click();
+  };
+
   return (
     <Dashboardcontainer>
       <TopbarContainer>
@@ -73,9 +82,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </RequestBtn>
 
           <GenericBtn
-            tooltip=""
+            tooltip="Download MarkingScheme Template"
             type="button"
-            title="Notification(0)"
+            title="Download Template"
             sx={{
               fontSize: '0.8rem',
               borderRadius: '20px',
@@ -86,7 +95,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 background: THEME.colors.background.primary,
               },
             }}
+            onClick={downloadTemplate}
           />
+          <NotificationModal />
         </div>
       </TopbarContainer>
 
@@ -104,9 +115,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   },
                 }}
               >
-                EA
+                JM
               </Avatar>
-              <p style={{ fontSize: '0.8rem' }}>Emmanuel Akowuah</p>
+              <p style={{ fontSize: '0.8rem' }}>Jamel Martey</p>
             </UserDetails>
             <NavLinks to={`${Constants.PATHS.home}`} aria-label="link to home">
               <BiHome size={20} />

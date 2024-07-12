@@ -24,111 +24,21 @@ interface MarkingSchemeData {
 
 const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
   const [active, setActive] = useState<number>(0);
-  
-  const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true); // State to manage next button disable
-  
-  const {
-    handleFolderSelect,
-    mutate,
-    all,
-    setAll,
-    selectedFolder,
-    validateData,
-  } = useDashboard();
-  
+  const [isNextDisabled, setIsNextDisabled] = useState<boolean>(true);
+  const { handleFolderSelect, mutate, all, setAll, selectedFolder, validateData } = useDashboard();
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { incorrect } = useContext(appContext);
-  const [markingSchemeLength, setMarkingSchemeLength] = useState<number>()
+  const [markingSchemeLength, setMarkingSchemeLength] = useState<number>(0);
 
-  async function handleMarkingSchemeFile() {
-    const markingSchemeFile = await dialog.open({
-      multiple: false,
-      filters: [
-        {
-          name: 'File',
-          extensions: ['xlsx'],
-        },
-      ],
-      directory: false,
-      title: 'Select Marking Scheme',
-    });
-
-    if (typeof markingSchemeFile === 'string') {
-      setSelectedFile(markingSchemeFile);
-      const filePath = markingSchemeFile;
-
-      // Read the file using Tauri's filesystem API
-      const arrayBuffer = await readBinaryFile(filePath);
-      console.log(arrayBuffer);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-
-      // Assuming the data is in the first sheet
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
-
-      console.log(jsonData);	
-      // Extract the required data format: choice, marks, bonus
-      const formattedData: IAllData = {};
-      jsonData.forEach((row, index) => {
-        formattedData[row.__rowNum__] = {
-          choice: row.Choice || '',
-          correct: row.Marks,
-          incorrect: incorrect,
-          isBonus: row.Bonus 
-        };
-      });
-
-      setAll(formattedData);
-      console.log(formattedData);
-
-      setMarkingSchemeLength(Object.keys(formattedData).length);
-      console.log(Object.keys(formattedData).length);
-    }
-    
-  }
-
-
-
-  function DisplayDivMultipleTimes() {
-    const divs = [];
-
-    // @ts-ignore
-    for (let i = 1; i <= parseInt(form.values['number_of_questions']); i++) {
-      divs.push(
-        <MasterKeyPage
-          key={i}
-          all={all}
-          setAll={setAll}
-          index={i}
-          question_number={i}
-        />
-      );
-    }
-
-    return <>{divs}</>;
-  }
-
-  const handleSubmit = (values: any) => {
-    console.log(markingSchemeLength); 
-    console.log(parseInt(values.number_of_questions))
-    if (parseInt(values.number_of_questions) !== markingSchemeLength) {
-      alert("The number of questions does not match the length of the uploaded file data.");
-      return;
-    }
-   
-    mutate.mutate(values);
-  };
-
-  const form: UseFormReturnType<any, (values: any) => typeof schema> =
-    useUserForm({
-      validate: zodResolver(schema),
-      initialValues: {
-        course_code: '',
-        department_code: '',
-        year: '',
-        number_of_questions: '',
-      },
-    });
+  const form: UseFormReturnType<any, (values: any) => typeof schema> = useUserForm({
+    validate: zodResolver(schema),
+    initialValues: {
+      course_code: '',
+      department_code: '',
+      year: '',
+      number_of_questions: '',
+    },
+  });
 
   useEffect(() => {
     const currentStepInputs = getCurrentStepInputs();
@@ -146,14 +56,107 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
     }
   };
 
+  const handleMarkingSchemeFile = async () => {
+    const markingSchemeFile = await dialog.open({
+      multiple: false,
+      filters: [
+        {
+          name: 'File',
+          extensions: ['xlsx'],
+        },
+      ],
+      directory: false,
+      title: 'Select Marking Scheme',
+    });
+  
+    if (typeof markingSchemeFile === 'string') {
+      setSelectedFile(markingSchemeFile);
+      const filePath = markingSchemeFile;
+  
+      try {
+        const arrayBuffer = await readBinaryFile(filePath);
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+  
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+  
+        if (jsonData.length === 0) {
+          throw new Error("The uploaded file is empty.");
+        }
+  
+       // Convert object keys to lowercase
+       const lowerCaseKeys = (obj: any) =>
+        Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+
+      const firstRowLowerCase = lowerCaseKeys(jsonData[0]);
+      const requiredColumns = ['choice', 'marks', 'bonus'];
+      const missingColumns = requiredColumns.filter(column => !firstRowLowerCase.hasOwnProperty(column));
+
+      if (missingColumns.length > 0) {
+        throw new Error(`The uploaded file is missing the following columns: ${missingColumns.join(', ')}`);
+      }
+  
+        const formattedData: IAllData = {};
+        jsonData.forEach((row, index) => {
+          if (typeof row.Choice !== 'string' || typeof row.Marks !== 'number' || typeof row.Bonus !== 'boolean') {
+            throw new Error(`Invalid data format in row ${index + 1}.`);
+          }
+          formattedData[row.__rowNum__] = {
+            choice: row.Choice || '',
+            correct: row.Marks,
+            incorrect: incorrect,
+            isBonus: row.Bonus
+          };
+        });
+  
+        setAll(formattedData);
+        setMarkingSchemeLength(Object.keys(formattedData).length);
+      } catch (error:any) {
+        alert(`Error: ${error.message}`);
+        setSelectedFile(null);
+      }
+    }
+  };
+  
+
+  const DisplayDivMultipleTimes = () => {
+    const divs = [];
+    for (let i = 1; i <= parseInt(form.values['number_of_questions']); i++) {
+      divs.push(
+        <MasterKeyPage
+          key={i}
+          all={all}
+          setAll={setAll}
+          index={i}
+          question_number={i}
+        />
+      );
+    }
+    return <>{divs}</>;
+  };
+
+  const handleSubmit = (values: any) => {
+    const isValid = validateData(form.values);
+    if (!isValid) {
+      return;
+    }
+    if (markingSchemeLength !== 0) {
+      if (parseInt(values.number_of_questions) !== markingSchemeLength) {
+        alert("The number of questions does not match the length of the uploaded file data.");
+        return;
+      }
+    }
+    mutate.mutate(values);
+  };
+
   const nextStep = () => {
-    if (!isNextDisabled) {
+    const isValid = validateData(form.values);
+    if (isValid && !isNextDisabled) {
       setActive((current) => (current < 2 ? current + 1 : current));
     }
   };
 
-  const prevStep = () =>
-    setActive((current) => (current > 0 ? current - 1 : current));
+  const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
 
   return (
     <>
@@ -165,7 +168,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
           </LoaderWrapper>
         ) : (
           <UserFormProvider form={form}>
-            {/* @ts-ignore */}
             <form onSubmit={form.onSubmit(handleSubmit)}>
               <Stepper
                 active={active}
@@ -181,10 +183,10 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       val_name="course_code"
                       label="Course code"
                     />
-
                     <GenericInput
-                      val_name="department_code"
+                      {...form.getInputProps('department_code')}
                       placeholder="050"
+                      val_name="department_code"
                       label="Department code"
                       type="number"
                     />
@@ -193,11 +195,11 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                 <Stepper.Step>
                   <ModalInputs>
                     <GenericInput
+                      {...form.getInputProps('number_of_questions')}
                       placeholder="40"
                       val_name="number_of_questions"
-                      label="Total count of questions"
+                      label="Total number of questions"
                     />
-
                     <GenericBtn
                       title="Select Folder"
                       onClick={handleFolderSelect}
@@ -209,7 +211,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                         background: '#fff',
                         borderRadius: '10px',
                         color: `${THEME.colors.background.black}`,
-
                         '&:hover': {
                           background: THEME.colors.button.midnight_green,
                         },
@@ -241,7 +242,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                         background: '#fff',
                         borderRadius: '10px',
                         color: `${THEME.colors.background.black}`,
-
                         '&:hover': {
                           background: THEME.colors.button.midnight_green,
                         },
@@ -259,7 +259,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       </Text>
                     )}
                   </div>
-
                   {!selectedFile && (
                     <div>
                       <div
@@ -270,9 +269,7 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                           width: '90%',
                         }}
                       >
-                        <div
-                          style={{ textAlign: 'center', paddingTop: '1rem' }}
-                        >
+                        <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
                           OR
                         </div>
                         <KeyheadStyles>
@@ -312,15 +309,12 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                           </Text>
                         </Group>
                       </div>
-
                       <DisplayDivMultipleTimes />
                     </div>
                   )}
                 </Stepper.Completed>
               </Stepper>
-
               <br />
-
               <Group
                 style={{
                   display: 'flex',
@@ -357,29 +351,23 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                       color: '#000000',
                       background: '#fff',
                       cursor: isNextDisabled ? 'not-allowed' : 'pointer',
-
                       '&:hover': {
                         background: THEME.colors.button.midnight_green,
                       },
                     }}
                   />
                 ) : null}
-
                 {active == 2 ? (
                   <GenericBtn
                     title="Done"
                     type="submit"
-                    onClick={() => {
-                      validateData(form.values)
-                      handleSubmit(form.values)
-                    }}
+                    onClick={() => validateData(form.values)}
                     sx={{
                       fontSize: '0.8rem',
                       borderRadius: '20px',
                       padding: '0 3rem',
                       color: '#000000',
                       background: '#fff',
-
                       '&:hover': {
                         background: THEME.colors.button.midnight_green,
                       },

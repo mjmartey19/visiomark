@@ -16,6 +16,9 @@
       "notification": {
         "all": true
       },
+      "http": {
+        "all": true
+      },
       "shell": {
         "all": true,
         "open": false,
