@@ -1,8 +1,31 @@
 import { useContext, useState } from 'react';
 import { appContext } from './Context';
-import { BaseDirectory, readDir, readTextFile, removeDir, removeFile, writeTextFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
 import { MarkingSchemeType, MetadataType } from '../pages/common/components/types';
+
+export const ensureDirectoriesExist = async () => {
+  const visioMarkPath = 'VisioMark';
+  const resultPath = 'VisioMark/Result';
+
+  const visioMarkExists = await exists(visioMarkPath, {
+    dir: BaseDirectory.Document,
+  });
+
+  if (!visioMarkExists) {
+    await createDir(visioMarkPath, { dir: BaseDirectory.Document, recursive: true });
+  }
+
+  const resultExists = await exists(resultPath, {
+    dir: BaseDirectory.Document,
+  });
+
+  if (!resultExists) {
+    await createDir(resultPath, { dir: BaseDirectory.Document, recursive: true });
+  }
+};
+
+export default ensureDirectoriesExist;
 
 
 export const readCSVFile = async ({
@@ -211,6 +234,25 @@ export const getFilenamesFromLocalStorage = () => {
     : [];
   return getStoredData;
 };
+
+export const storeExceptionToLocalStorage = (data: ITableDataProps[]) => {
+  let count = 0;
+  console.log(data)
+  data.forEach(item => {
+    console.log('predictions', item.predictions)
+    if (typeof item.predictions === 'string') {
+      const predictions = item.predictions.split(',');
+      predictions.forEach(prediction => {
+        if (prediction === 'Exceptions') {
+          count++;
+        }
+      });
+    }
+  });
+  console.log('exceptionCount', count)
+  localStorage.setItem('exceptionCount', count.toString());
+};
+
 
 export const storeToLocalStorage = (fileName: string) => {
   const getStoredData = getFilenamesFromLocalStorage();

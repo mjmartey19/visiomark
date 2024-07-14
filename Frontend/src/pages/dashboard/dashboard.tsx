@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { THEME } from '../../appTheme';
 import SharedCard from '../common/components/Card/card';
 import Layout from '../common/components/Layout';
@@ -5,33 +6,49 @@ import GenericBtn from '../common/components/button';
 import { RFContent, RecentFiles, RequestBtn } from './styles';
 import { useDisclosure } from '@mantine/hooks';
 import Modalforms from './ModalForms';
-import { readDir, BaseDirectory } from '@tauri-apps/api/fs';
+import { readDir, BaseDirectory, FileEntry } from '@tauri-apps/api/fs';
 import { ScrollArea, Text } from '@mantine/core';
 import useDashboard from './hook/useDashboard';
-// import { readMetadata } from '../../utils/helper';
+import ensureDirectoriesExist from '../../utils/helper'; // Import the utility function
 
-const entries = await readDir('visioMark\\result', {
-  dir: BaseDirectory.Document,
-  recursive: true,
-});
+// Define the type for file entries
+interface FileEntryWithOptionalName extends FileEntry {
+  name?: string;
+}
 
+const fetchEntries = async (): Promise<FileEntryWithOptionalName[]> => {
+  const entries = await readDir('visioMark\\result', {
+    dir: BaseDirectory.Document,
+    recursive: true,
+  });
+  return entries;
+};
 
-
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const { getFilenamesFromLocalStorage } = useDashboard();
   const [opened, { open, close }] = useDisclosure(false);
+  const [entries, setEntries] = useState<FileEntryWithOptionalName[]>([]);
+
+  useEffect(() => {
+    const initializeDirectoriesAndFetchEntries = async () => {
+      await ensureDirectoriesExist(); // Ensure directories exist on component mount
+      const fetchedEntries = await fetchEntries(); // Fetch entries after ensuring directories exist
+      setEntries(fetchedEntries);
+    };
+
+    initializeDirectoriesAndFetchEntries();
+  }, []);
 
   const recentFiles = getFilenamesFromLocalStorage();
 
-  function findMatches() {
+  const findMatches = (): FileEntryWithOptionalName[] => {
     const matches = recentFiles.map((itemName) => {
       const matchedItems = entries.filter((item) => item.name === itemName);
-  
       return matchedItems;
     });
 
     return matches.flat();
-  }
+  };
 
   const recentEntries = findMatches();
 

@@ -225,7 +225,7 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
         <td>
           <Text
             sx={{
-              background: `${exceptions === 0 ? 'green' : 'red'}`,
+              background: `${exceptions === 0 ? THEME.colors.background.primary : 'red'}`,
               padding: '0.4rem',
               width: '2rem',
               textAlign: 'center',

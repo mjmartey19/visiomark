@@ -31,12 +31,17 @@ import Modalforms from '../../dashboard/ModalForms';
 import { RequestBtn } from '../../dashboard/styles';
 import { useDisclosure } from '@mantine/hooks';
 import NotificationModal from '../notification/notification';
+import { appContext } from '../../../utils/Context';
+import { useContext, useEffect, useRef } from 'react';
+import UserAvatar from './UserAvator';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { tabValue } = useParams();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [opened, { open, close }] = useDisclosure(false);
+  const { setUserDetails, userDetails } = useContext(appContext); 
+  const inactivityTimeout = useRef<NodeJS.Timeout | null>(null);  // Timer reference
 
   const downloadTemplate = () => {
     const link = document.createElement('a');
@@ -44,6 +49,46 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     link.download = 'MarkingSchemeTemplate.xlsx';
     link.click();
   };
+
+  // Utility function to get initials from a name
+const getInitials = (name: string): string => {
+  const nameParts = name.split(' ');
+  const initials = nameParts.map(part => part.charAt(0).toUpperCase()).join('');
+  return initials;
+};
+
+  const logout = () => {
+    setUserDetails(null);  // Clear user details from context
+    localStorage.removeItem('userDetails');  // Remove user details from local storage
+    navigate(Constants.PATHS.signIn);  // Redirect to login page
+  };
+
+  const resetInactivityTimeout = () => {
+    if (inactivityTimeout.current) {
+      clearTimeout(inactivityTimeout.current);
+    }
+
+    inactivityTimeout.current = setTimeout(logout, 60000*5);  // Set timeout to 1 minute (60000 ms)
+  };
+
+  useEffect(() => {
+    const handleActivity = () => {
+      resetInactivityTimeout();
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+
+    resetInactivityTimeout();  // Initial timeout setting
+
+    return () => {
+      if (inactivityTimeout.current) {
+        clearTimeout(inactivityTimeout.current);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, []);
 
   return (
     <Dashboardcontainer>
@@ -80,8 +125,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               onClick={open}
             />
           </RequestBtn>
+             <GenericBtn
+              tooltip=""
+              type="button"
+              title="Exceptions(0)"
+              sx={{
+                fontSize: '0.8rem',
+                borderRadius: '20px',
+                padding: '0 1rem',
+                color: '#fff',
+                background: THEME.colors.background.jet,
 
-          <GenericBtn
+                '&:hover': {
+                  background: THEME.colors.background.primary,
+                },
+              }}
+            />
+
+          {/* <GenericBtn
             tooltip="Download MarkingScheme Template"
             type="button"
             title="Download Template"
@@ -96,8 +157,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               },
             }}
             onClick={downloadTemplate}
-          />
-          <NotificationModal />
+          /> */}
+
         </div>
       </TopbarContainer>
 
@@ -105,19 +166,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <SidebarContainer>
           <Navigation>
             <UserDetails>
-              <Avatar
-                radius="xl"
-                styles={{
-                  placeholder: {
-                    color: '#fff',
-                    backgroundColor: `${THEME.colors.background.jet}`,
-                    fontSize: '0.8rem',
-                  },
-                }}
-              >
-                JM
-              </Avatar>
-              <p style={{ fontSize: '0.8rem' }}>Jamel Martey</p>
+              <UserAvatar userDetails={userDetails} />
+              <p style={{ fontSize: '1rem' }}>{userDetails?.name}</p>
             </UserDetails>
             <NavLinks to={`${Constants.PATHS.home}`} aria-label="link to home">
               <BiHome size={20} />
@@ -160,8 +210,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </NavLinks>
           </Navigation>
           <NavLinks
-            to={`${Constants.PATHS.logout}`}
-            aria-label="settings of the user"
+            onClick={logout}  // Call handleLogout on click
+            to={`${Constants.PATHS.signIn}`}
+            aria-label="logout of the user"
           >
             <FiLogOut size={20} />
             Logout

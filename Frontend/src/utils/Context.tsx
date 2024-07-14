@@ -7,6 +7,12 @@ type ResponseData = {
   'index number': string;
 }[];
 
+type UserDetails = {
+  name: string;
+  email: string;
+  picture: string;
+} | null;
+
 export function usePersistentState<T>(key: string, initialState: T) {
   const [state, setState] = useState<T>(() => {
     const storedValue = localStorage.getItem(key);
@@ -31,6 +37,8 @@ interface IAppContext {
   setCorrect: Dispatch<SetStateAction<number>>;
   incorrect: number;
   setIncorrect: Dispatch<SetStateAction<number>>;
+  userDetails: UserDetails;
+  setUserDetails: Dispatch<SetStateAction<UserDetails>>;
 }
 
 export const appContext = createContext<IAppContext>({
@@ -44,6 +52,8 @@ export const appContext = createContext<IAppContext>({
   setCorrect: () => {},
   incorrect: 0,
   setIncorrect: () => {},
+  userDetails: null,
+  setUserDetails: () => {},
 });
 
 const AppProvider = ({ children }: { children: ReactNode }) => {
@@ -52,6 +62,7 @@ const AppProvider = ({ children }: { children: ReactNode }) => {
   const [fileName, setFileName] = usePersistentState<string>('fileName', '');
   const [correct, setCorrect] = useState<number>(1);
   const [incorrect, setIncorrect] = useState<number>(0);
+  const [userDetails, setUserDetails] = usePersistentState<UserDetails>('userDetails', null);
 
   const value = {
     responseData,
@@ -64,6 +75,8 @@ const AppProvider = ({ children }: { children: ReactNode }) => {
     setCorrect,
     incorrect,
     setIncorrect,
+    userDetails,
+    setUserDetails,
   };
 
   return <appContext.Provider value={value}>{children}</appContext.Provider>;
