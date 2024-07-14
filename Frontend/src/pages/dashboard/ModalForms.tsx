@@ -261,6 +261,9 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                   </div>
                   {!selectedFile && (
                     <div>
+                      <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
+                          OR
+                        </div>
                       <div
                         style={{
                           display: 'flex',
@@ -269,9 +272,6 @@ const Modalforms = ({ open, close }: { open: boolean; close: () => void }) => {
                           width: '90%',
                         }}
                       >
-                        <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
-                          OR
-                        </div>
                         <KeyheadStyles>
                           Select the correct answers
                         </KeyheadStyles>
