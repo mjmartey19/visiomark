@@ -32,7 +32,7 @@ import { RequestBtn } from '../../dashboard/styles';
 import { useDisclosure } from '@mantine/hooks';
 import NotificationModal from '../notification/notification';
 import { appContext } from '../../../utils/Context';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import UserAvatar from './UserAvator';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -42,6 +42,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const { setUserDetails, userDetails } = useContext(appContext); 
   const inactivityTimeout = useRef<NodeJS.Timeout | null>(null);  // Timer reference
+  const [exceptionCount, setExceptionCount] = useState<number>(0);
 
   const downloadTemplate = () => {
     const link = document.createElement('a');
@@ -50,12 +51,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     link.click();
   };
 
-  // Utility function to get initials from a name
-const getInitials = (name: string): string => {
-  const nameParts = name.split(' ');
-  const initials = nameParts.map(part => part.charAt(0).toUpperCase()).join('');
-  return initials;
-};
+  useEffect(() => {
+    // Fetch exception count from localStorage when component mounts
+    const storedExceptionCount = localStorage.getItem('exceptionCount');
+    if (storedExceptionCount) {
+      setExceptionCount(parseInt(storedExceptionCount, 10));
+    }
+  }, []);
 
   const logout = () => {
     setUserDetails(null);  // Clear user details from context
@@ -68,7 +70,7 @@ const getInitials = (name: string): string => {
       clearTimeout(inactivityTimeout.current);
     }
 
-    inactivityTimeout.current = setTimeout(logout, 60000*5);  // Set timeout to 1 minute (60000 ms)
+    inactivityTimeout.current = setTimeout(logout, 60000*20);  // Set timeout to 1 minute (60000 ms)
   };
 
   useEffect(() => {
@@ -125,24 +127,9 @@ const getInitials = (name: string): string => {
               onClick={open}
             />
           </RequestBtn>
-             <GenericBtn
-              tooltip=""
-              type="button"
-              title="Exceptions(0)"
-              sx={{
-                fontSize: '0.8rem',
-                borderRadius: '20px',
-                padding: '0 1rem',
-                color: '#fff',
-                background: THEME.colors.background.jet,
+          
 
-                '&:hover': {
-                  background: THEME.colors.background.primary,
-                },
-              }}
-            />
-
-          {/* <GenericBtn
+          <GenericBtn
             tooltip="Download MarkingScheme Template"
             type="button"
             title="Download Template"
@@ -157,7 +144,7 @@ const getInitials = (name: string): string => {
               },
             }}
             onClick={downloadTemplate}
-          /> */}
+          />
 
         </div>
       </TopbarContainer>

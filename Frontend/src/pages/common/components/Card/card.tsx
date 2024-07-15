@@ -9,13 +9,16 @@ import { VscPreview } from 'react-icons/vsc';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Constants } from '../../../../utils/constants';
-import { readCSVFile, getMetadata } from '../../../../utils/helper';
+import { readCSVFile, getMetadata, getTotalExceptions } from '../../../../utils/helper';
 import { useContext } from 'react';
 import { appContext } from '../../../../utils/Context';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import SharedCardMenu from './cardMenu';
 import moment from 'moment';
 import { MetadataType } from '../types';
+import { set } from 'zod';
+import { ITableDataProps } from '../../Table/types';
+import { IStudentDataProps } from '../../../../utils/type';
 
 
 
@@ -28,6 +31,8 @@ const SharedCard = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [metadata, setMetadata] = useState<MetadataType | null>(null);
+  const [responseData, setResponseData] = useState<IStudentDataProps[]>([]);
+  const [exceptionCount, setExceptionCount] = useState<number>(0)
 
 
   const handleMenuClick = () => {
@@ -44,11 +49,34 @@ const SharedCard = ({
 
   };
 
+  const fetchResponseData = async () => {
+    try {
+      const data = await readCSVFile({ name_of_file})
+    setResponseData(data);
+    // console.log('Data', data)
+
+    } catch (error) {
+      console.error('Error fetching response data:', error);
+    }
+  }
+
+
   useEffect(() => {
-    if (name_of_file) { 
+    if (name_of_file) {
       fetchMetaData();
+      fetchResponseData();
     }
   }, [name_of_file]);
+
+  useEffect(() => {
+    if (responseData) {
+      const count = getTotalExceptions(responseData);
+      console.log('COunt', count)
+      
+      setExceptionCount(count);
+      // console.log('Count',count)
+    }
+  }, [responseData]);
 
   return (
     <div
@@ -125,6 +153,21 @@ const SharedCard = ({
             >
               Marked {moment(metadata?.createdAt ).fromNow()}
             </Text>
+            <div  style={{
+                display: 'flex',
+                alignItems: 'center',
+                color: `${THEME.colors.text.primary}`,
+                justifyContent: 'space-between',
+                background: THEME.colors.background.jet,
+                marginTop: '0.6rem',
+                borderRadius: '5rem',
+                paddingLeft: '0.5rem'
+              }}>
+                <Text size="sm">
+                   Exceptions 
+                </Text>
+                <Text style={{background: THEME.colors.background.primary, padding: '0.1rem 0.6rem ', borderRadius: '50%', color: 'red'}}>{exceptionCount}</Text>
+            </div>
           </div>
         </div>
 

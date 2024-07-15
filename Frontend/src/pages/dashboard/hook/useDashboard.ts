@@ -9,7 +9,7 @@ import { THEME } from '../../../appTheme';
 import { schema } from '../schema';
 import { z } from 'zod';
 import { dialog } from '@tauri-apps/api';
-import { getFilenamesFromLocalStorage, storeToLocalStorage, storeExceptionToLocalStorage } from '../../../utils/helper';
+import { getFilenamesFromLocalStorage, storeToLocalStorage } from '../../../utils/helper';
 import { IAllData } from '../types';
 import { rem } from '@mantine/core';
 import { FiCheck } from 'react-icons/fi';
@@ -69,7 +69,6 @@ const useDashboard = () => {
           storeToLocalStorage(responseData[0]);
           setResponseData(responseData[1]);
           setForPreview(true);
-          storeExceptionToLocalStorage(responseData[1]);
 
           AppAlert({
             title: 'Success',

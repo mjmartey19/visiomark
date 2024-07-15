@@ -51,7 +51,7 @@ const AnswerCard = ({
         <span
           style={{
             fontSize: '0.9rem',
-            color: `${THEME.colors.background.primary}`,
+            color: '#fff',
           }}
         >{`${number}. `}</span>
         {isEditing ? (
@@ -243,6 +243,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
     const updatedAnswers = [...editedAnswers];
     updatedAnswers[index] = newAnswer;
     setEditedAnswers(updatedAnswers);
+   
   };
 
   

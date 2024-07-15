@@ -3,6 +3,7 @@ import { appContext } from './Context';
 import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
 import { MarkingSchemeType, MetadataType } from '../pages/common/components/types';
+import { IStudentDataProps } from './type';
 
 export const ensureDirectoriesExist = async () => {
   const visioMarkPath = 'VisioMark';
@@ -235,23 +236,28 @@ export const getFilenamesFromLocalStorage = () => {
   return getStoredData;
 };
 
-export const storeExceptionToLocalStorage = (data: ITableDataProps[]) => {
-  let count = 0;
-  console.log(data)
+export const getTotalExceptions = (data: IStudentDataProps[] | ITableDataProps): number => {
+  if (!Array.isArray(data)) {
+    return 0;
+  }
+
+  let exceptionCount = 0;
+
   data.forEach(item => {
-    console.log('predictions', item.predictions)
+    // Check if predictions field exists and is a string
     if (typeof item.predictions === 'string') {
-      const predictions = item.predictions.split(',');
-      predictions.forEach(prediction => {
-        if (prediction === 'Exceptions') {
-          count++;
-        }
-      });
+      // Split the predictions string by commas and count the occurrences of 'Exceptions'
+      exceptionCount += item.predictions.split(',').filter(prediction => prediction.trim() === 'Exceptions').length;
     }
   });
-  console.log('exceptionCount', count)
-  localStorage.setItem('exceptionCount', count.toString());
+
+  return exceptionCount;
 };
+
+
+
+
+
 
 
 export const storeToLocalStorage = (fileName: string) => {

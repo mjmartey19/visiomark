@@ -96,7 +96,7 @@ function filterData(data: ITableDataProps[], search: string) {
       if (isString(value)) {
         return value.toLowerCase().includes(query);
       }
-      return value.toString().includes(query);
+      return value?.toString().includes(query);
     })
   );
 }
@@ -122,19 +122,21 @@ function sortData(
 
       if (isString(valueA) && isString(valueB)) {
         if (payload.reversed) {
-          return valueB.localeCompare(valueA);
+          return valueB?.localeCompare(valueA);
         }
-        return valueA.localeCompare(valueB);
+        return valueA?.localeCompare(valueB);
       }
 
       if (typeof valueA === typeof valueB) {
-        return payload.reversed
+        if(valueA !== undefined && valueB !== undefined){
+          return payload.reversed
           ? valueB > valueA
             ? -1
             : 1
           : valueA > valueB
           ? -1
           : 1;
+        }
       }
 
       return 0;

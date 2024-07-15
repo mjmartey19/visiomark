@@ -3,7 +3,7 @@ export interface ITableDataProps {
   predictions: string;
   score: number;
   file_name: string;
-  exceptions: number; // Add this line
+  exceptions?: number; // Add this line
 }
 
 export interface TableSortProps {
