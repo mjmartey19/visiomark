@@ -26,8 +26,13 @@
         "sidecar": true
       } , 
       "fs": {
-        "scope": ["$DOCUMENT", "$DOCUMENT/*", "$DOCUMENT/VisioMark/*",  "$DOCUMENT/VisioMark/result/*",
-        "$DOCUMENT/VisioMark/exam_sheets/**"],
+        "scope": [    
+          "$DOCUMENT",
+          "$DOCUMENT/*",
+          "$DOCUMENT/VisioMark/*",
+          "$DOCUMENT/VisioMark/exam_sheets/**",
+          "$DOCUMENT/VisioMark/*/**" 
+        ],
         "all": true, 
         "readFile": true,
         "writeFile": true,

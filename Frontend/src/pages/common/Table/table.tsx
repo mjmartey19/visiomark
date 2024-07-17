@@ -160,7 +160,7 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
   const [activeModalRow, setActiveModalRow] = useState<string | null>(null); // Track active modal row
   const [data, setData] = useState<ITableDataProps[]>(tdata);
   const [sortedData, setSortedData] = useState(data); // Initialize sortedData with data
-
+  const { userDetails } = useContext(appContext);
   useEffect(() => {
     // Update sortedData whenever data changes
     setSortedData(
@@ -170,7 +170,7 @@ function GenericTable({ tdata, csv_file_name }: TableSortProps) {
 
   const fetchMetaData = async () => {
     try {
-      const data = await getMetadata(csv_file_name); // Fetch metadata
+      const data = await getMetadata({ userId: userDetails?.id, name_of_file: csv_file_name }); // Fetch metadata
       setMetadata(data);
     } catch (error) {
       console.error('Error fetching metadata:', error);

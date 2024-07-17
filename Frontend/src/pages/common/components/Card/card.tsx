@@ -1,39 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Text, Tooltip } from '@mantine/core';
+import React, { useState, useEffect, useContext } from 'react';
+import { Card, Text } from '@mantine/core';
 import { THEME } from '../../../../appTheme';
 import { FileEntry } from '@tauri-apps/api/fs';
-import { open } from '@tauri-apps/api/shell';
 import { FiFileText } from 'react-icons/fi';
-import { BiLinkExternal, BiTrash } from 'react-icons/bi';
-import { VscPreview } from 'react-icons/vsc';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { Constants } from '../../../../utils/constants';
-import { readCSVFile, getMetadata, getTotalExceptions } from '../../../../utils/helper';
-import { useContext } from 'react';
-import { appContext } from '../../../../utils/Context';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import SharedCardMenu from './cardMenu';
+import styled from 'styled-components';
 import moment from 'moment';
 import { MetadataType } from '../types';
-import { set } from 'zod';
-import { ITableDataProps } from '../../Table/types';
+import { appContext } from '../../../../utils/Context';
+import { readCSVFile, getMetadata, getTotalExceptions } from '../../../../utils/helper';
+import SharedCardMenu from './cardMenu';
 import { IStudentDataProps } from '../../../../utils/type';
 
-
-
-const SharedCard = ({
-  name_of_file,
-  entry,
-}: {
-  name_of_file: string | undefined;
-  entry: FileEntry;
-}) => {
+const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined; entry: FileEntry; }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [metadata, setMetadata] = useState<MetadataType | null>(null);
   const [responseData, setResponseData] = useState<IStudentDataProps[]>([]);
-  const [exceptionCount, setExceptionCount] = useState<number>(0)
-
+  const [exceptionCount, setExceptionCount] = useState<number>(0);
+  const { userDetails } = useContext(appContext);
 
   const handleMenuClick = () => {
     setIsHovered(false); // Reset hover state
@@ -41,25 +25,34 @@ const SharedCard = ({
 
   const fetchMetaData = async () => {
     try {
-      const data = await getMetadata(name_of_file); // Fetch metadata
-      setMetadata(data); 
+      if (name_of_file) {
+        const data = await getMetadata({ userId: userDetails?.id, name_of_file }); // Fetch metadata
+        setMetadata(data);
+      }
     } catch (error) {
       console.error('Error fetching metadata:', error);
     }
-
   };
 
+ 
+  
   const fetchResponseData = async () => {
     try {
-      const data = await readCSVFile({ name_of_file})
-    setResponseData(data);
-    // console.log('Data', data)
-
+      if (userDetails?.id && name_of_file) {
+        const data = await readCSVFile({ userId: userDetails.id, name_of_file });
+        const formattedData: IStudentDataProps[] = data?.map(item => ({
+          file_name: item.file_name,
+          predictions: item.predictions,
+          score: item.score,
+          index_number: item['index number']
+        })) ?? [];
+        setResponseData(formattedData);
+        // console.log('Data', data);
+      }
     } catch (error) {
       console.error('Error fetching response data:', error);
     }
-  }
-
+  };
 
   useEffect(() => {
     if (name_of_file) {
@@ -71,10 +64,8 @@ const SharedCard = ({
   useEffect(() => {
     if (responseData) {
       const count = getTotalExceptions(responseData);
-      console.log('COunt', count)
-      
+      console.log('Count', count);
       setExceptionCount(count);
-      // console.log('Count',count)
     }
   }, [responseData]);
 
@@ -126,7 +117,7 @@ const SharedCard = ({
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                maxWidth: '150px'
+                maxWidth: '150px',
               }}
             >
               {name_of_file}
@@ -151,9 +142,10 @@ const SharedCard = ({
                 gap: '1rem',
               }}
             >
-              Marked {moment(metadata?.createdAt ).fromNow()}
+              Marked {moment(metadata?.createdAt).fromNow()}
             </Text>
-            <div  style={{
+            <div
+              style={{
                 display: 'flex',
                 alignItems: 'center',
                 color: `${THEME.colors.text.primary}`,
@@ -161,16 +153,23 @@ const SharedCard = ({
                 background: THEME.colors.background.jet,
                 marginTop: '0.6rem',
                 borderRadius: '5rem',
-                paddingLeft: '0.5rem'
-              }}>
-                <Text size="sm">
-                   Exceptions 
-                </Text>
-                <Text style={{background: THEME.colors.background.primary, padding: '0.1rem 0.6rem ', borderRadius: '50%', color: 'red'}}>{exceptionCount}</Text>
+                paddingLeft: '0.5rem',
+              }}
+            >
+              <Text size="sm">Exceptions</Text>
+              <Text
+                style={{
+                  background: THEME.colors.background.primary,
+                  padding: '0.1rem 0.6rem',
+                  borderRadius: '50%',
+                  color: 'red',
+                }}
+              >
+                {exceptionCount}
+              </Text>
             </div>
           </div>
         </div>
-
         <div
           style={{
             cursor: 'pointer',
@@ -179,7 +178,9 @@ const SharedCard = ({
           <BsThreeDotsVertical color="#fff" />
         </div>
       </Card>
-      {isHovered && <SharedCardMenu name_of_file={entry.name} entry={entry} onMenuClick={handleMenuClick} />}
+      {isHovered && (
+        <SharedCardMenu name_of_file={entry.name} entry={entry} onMenuClick={handleMenuClick} />
+      )}
     </div>
   );
 };
@@ -197,6 +198,5 @@ const IconContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  /* gap: 1rem; */
   cursor: pointer;
 `;

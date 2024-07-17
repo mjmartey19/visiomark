@@ -96,7 +96,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   const [indexNumber, setIndexNumber] = useState<string>(data['index number']);
   const [score, setScore] = useState<number>(data.score);
 
-  const { responseData, setResponseData } = useContext(appContext);
+  const { responseData, setResponseData, userDetails } = useContext(appContext);
 
   const answersPerPage = !isEditing ? 49 : 42;
   const imageRef = useRef<HTMLImageElement>(null);
@@ -105,7 +105,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
 
   useEffect(() => {
     if (image_dir && !imageSrc && data.file_name) {
-      const image_path = `VisioMark\\exam_sheets\\${image_dir.trim()}\\${data.file_name.trim()}`;
+      const image_path = `VisioMark\\${userDetails?.id}\\exam_sheets\\${image_dir.trim()}\\${data.file_name.trim()}`;
       readImageFile(image_path);
       console.log(image_path);
     }
@@ -304,7 +304,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
   
     try {
       await writeFile(
-        { contents: csvData, path: `VisioMark\\result\\${csv_file}` },
+        { contents: csvData, path: `VisioMark\\${userDetails?.id}\\result\\${csv_file}` },
         { dir: BaseDirectory.Document }
       );
       setIsEditing(false);
@@ -338,7 +338,7 @@ const ModalPreview: React.FC<ModalPreviewProps> = ({
       .join('\n');
 
     await writeFile(
-      { contents: csvData, path: `VisioMark\\result\\${csv_file}` },
+      { contents: csvData, path: `VisioMark\\${userDetails?.id}\\result\\${csv_file}` },
       { dir: BaseDirectory.Document }
     );
 

@@ -3,16 +3,16 @@ import Layout from '../common/components/Layout';
 import { Text, Button, Select } from '@mantine/core'; 
 import { AllFilesContainer, StyledRefreshIcon, TitleStyles } from './styles';
 import SharedCard from '../common/components/Card/card';
-import { useState, useEffect } from 'react'; 
+import { useState, useEffect, useContext } from 'react'; 
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 import { generateDepartmentCode, getMetadata } from '../../utils/helper';
 import { THEME } from '../../appTheme';
 import styled from 'styled-components';
 import { sx } from '../common/components/layoutStyles';
 import { generateCourseCodes, generateAcademicYears } from '../../utils/helper';
+import { appContext } from '../../utils/Context';
 
 const ITEMS_PER_PAGE = 8; // Number of items to show per page
-
 
 
 const AllFiles = () => {
@@ -22,10 +22,11 @@ const AllFiles = () => {
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const { userDetails } = useContext(appContext)
 
   useEffect(() => {
     const fetchFiles = async () => {
-      const entries = await readDir('VisioMark\\result', {
+      const entries = await readDir(`VisioMark\\${userDetails?.id}\\result`, {
         dir: BaseDirectory.Document,
         recursive: true,
       });
@@ -42,7 +43,7 @@ const AllFiles = () => {
       if (selectedCourse || selectedDepartment || selectedYear) {
         filtered = await Promise.all(
           allFiles.map(async (entry) => {
-            const metadata = await getMetadata(entry.name);
+            const metadata = await getMetadata({ userId: userDetails?.id, name_of_file: entry.name });
             if (!metadata) return null;
   
             const { academic_year, course_code, department_code } = metadata;

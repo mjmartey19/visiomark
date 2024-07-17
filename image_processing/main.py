@@ -12,7 +12,7 @@ output_folder = 'output'
 
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
-    
+
 # Get the list of all files in directory tree at given path
 image_files = [f for f in os.listdir(input_folder) if os.path.isfile(os.path.join(input_folder, f))]
 

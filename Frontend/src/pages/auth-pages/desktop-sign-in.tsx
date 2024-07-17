@@ -15,7 +15,7 @@ const SignIn = () => {
 
   const login = useGoogleLogin({
     onSuccess: async (codeResponse) => {
-      fetch('http://127.0.0.1:8000/auth/userinfo', {
+      fetch('http://127.0.0.1:8000/auth/login', {
         method: 'POST',
         body: JSON.stringify({
           access_token: codeResponse['access_token'],
@@ -25,6 +25,7 @@ const SignIn = () => {
         .then((data) => {
           console.log(data);
           setUserDetails({
+            id: data.sub,
             name: data.name,
             email: data.email,
             picture: data.picture

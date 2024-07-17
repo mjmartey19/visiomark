@@ -34,16 +34,17 @@ const SharedCardMenu = ({
   const [shareOpened, { open: openShare, close: closeShare }] = useDisclosure(false); 
   const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const [email, setEmail] = useState("");
-  const runReadCSVFile = async () => {
-    const data = await readCSVFile({ name_of_file });
+  const { userDetails } = useContext(appContext);
+
+  const runReadCSVFile = async (userId: string | undefined, name_of_file: string | undefined) => {
+    const data = await readCSVFile({ userId, name_of_file });
     if (!data) return;
     setResponseData(data);
     navigate(`${Constants.PATHS.preview}`, { state: { data, name_of_file } });
-};
+  };
 
   const sendCSVByEmail = async () => {
-    // Here you would implement the logic to send the CSV file to the provided email
-    // For demonstration purposes, let's just log the email and open the share modal
+    // Implement the logic to send the CSV file to  provided email
     console.log("Email:", email);
     closeShare();
     openShare();
@@ -72,7 +73,6 @@ const SharedCardMenu = ({
             label="Open file"
             withArrow
             position="left"
-            // offset={-70}
             zIndex={500}
           >
             <IconContainer>
@@ -92,7 +92,7 @@ const SharedCardMenu = ({
                 color="#fff"
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  runReadCSVFile();
+                  runReadCSVFile(userDetails?.id, name_of_file);
                 }}
               />
             </IconContainer>
@@ -100,7 +100,7 @@ const SharedCardMenu = ({
 
           <Tooltip label="Share file" position="left">
             <IconContainer>
-            <ModalComp opened={shareOpened} close={closeShare}>
+              <ModalComp opened={shareOpened} close={closeShare}>
                 <div>
                   <Text
                     sx={{
@@ -111,7 +111,6 @@ const SharedCardMenu = ({
                   >
                     Share File
                   </Text>
-                  
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -122,7 +121,7 @@ const SharedCardMenu = ({
                       placeholder="Enter email address"
                       value={email}
                       onChange={(event) => setEmail(event.currentTarget.value)}
-                      sx ={sx}
+                      sx={sx}
                       style={{ width: '100%' }}
                     />
                     <GenericBtn
@@ -136,7 +135,6 @@ const SharedCardMenu = ({
                         color: '#000000',
                         background: '#fff',
                         cursor: 'pointer',
-  
                         '&:hover': {
                           background: THEME.colors.button.midnight_green,
                         },
@@ -147,9 +145,8 @@ const SharedCardMenu = ({
               </ModalComp>
               <LuShare size={20} color="#fff"  
                        style={{ cursor: 'pointer' }}
-                       onClick={() => {
-                        openShare();
-                      }}/>
+                       onClick={openShare}
+              />
             </IconContainer>
           </Tooltip>
 
@@ -180,14 +177,16 @@ const SharedCardMenu = ({
                     display: 'flex',
                     gap: '1rem',
                     alignItems: 'center',
-                    justifyContent:'flex-end',
+                    justifyContent: 'flex-end',
                     paddingTop: '2rem',
                   }}>
                     <GenericBtn
                       title="Cancel"
                       type="button"
-                      onClick={()=>{closeDelete(); onMenuClick()}}
-                      
+                      onClick={() => {
+                        closeDelete();
+                        onMenuClick();
+                      }}
                       sx={{
                         fontSize: '0.8rem',
                         borderRadius: '20px',
@@ -203,7 +202,7 @@ const SharedCardMenu = ({
                       title="Delete"
                       type="button"
                       onClick={() => {
-                        deleteCSVFile(name_of_file);
+                        deleteCSVFile({ userId: userDetails?.id, name_of_file } );
                       }}
                       sx={{
                         fontSize: '0.8rem',
@@ -224,9 +223,7 @@ const SharedCardMenu = ({
                 size={20}
                 color="#fff"
                 style={{ cursor: 'pointer' }}
-                onClick={() => {
-                  openDelete();
-                }}
+                onClick={openDelete}
               />
             </IconContainer>
           </Tooltip>
@@ -250,3 +247,5 @@ const IconContainer = styled.div`
   padding: 0.6rem,
   border-radius: 10px;
 `;
+
+

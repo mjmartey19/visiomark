@@ -30,7 +30,7 @@ const UserAvatar: React.FC<{ userDetails?: { picture?: string; name: string } | 
         <img src={userDetails.picture} width={40} alt="User Avatar" />
       ) : (
         <div >
-          {getInitials(userDetails.name)}
+          {}
         </div>
       )}
     </Avatar>

@@ -3,24 +3,39 @@ import { appContext } from './Context';
 import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { ITableDataProps } from '../pages/common/Table/types';
 import { MarkingSchemeType, MetadataType } from '../pages/common/components/types';
-import { IStudentDataProps } from './type';
+import { IStudentDataProps, ReadCSVFileProps } from './type';
 
-export const ensureDirectoriesExist = async () => {
+
+export const ensureDirectoriesExist = async (userId: string | undefined) => {
+  if (!userId) {
+    throw new Error('User ID is required to ensure directories exist.');
+  }
+
+  // Define the base paths
   const visioMarkPath = 'VisioMark';
-  const resultPath = 'VisioMark/Result';
+  const userPath = `VisioMark/${userId}`;
+  const resultPath = `VisioMark/${userId}/Result`;
 
+  // Check and create VisioMark directory if it does not exist
   const visioMarkExists = await exists(visioMarkPath, {
     dir: BaseDirectory.Document,
   });
-
   if (!visioMarkExists) {
     await createDir(visioMarkPath, { dir: BaseDirectory.Document, recursive: true });
   }
 
+  // Check and create user-specific directory if it does not exist
+  const userDirExists = await exists(userPath, {
+    dir: BaseDirectory.Document,
+  });
+  if (!userDirExists) {
+    await createDir(userPath, { dir: BaseDirectory.Document, recursive: true });
+  }
+
+  // Check and create Result directory for the user if it does not exist
   const resultExists = await exists(resultPath, {
     dir: BaseDirectory.Document,
   });
-
   if (!resultExists) {
     await createDir(resultPath, { dir: BaseDirectory.Document, recursive: true });
   }
@@ -30,30 +45,38 @@ export default ensureDirectoriesExist;
 
 
 export const readCSVFile = async ({
+  userId,
   name_of_file,
-}: {
-  name_of_file?: string;
-}) => {
+}: ReadCSVFileProps) => {
+  if (!userId) {
+    throw new Error('User ID is required to read CSV file.');
+  }
+
+  if (!name_of_file) {
+    throw new Error('File name is required to read CSV file.');
+  }
+
   try {
-    const result = await readTextFile(`VisioMark\\result\\${name_of_file}`, {
+    const result = await readTextFile(`VisioMark/${userId}/Result/${name_of_file}`, {
       dir: BaseDirectory.Document,
     });
     const csvData = result.trim().split('\n');
 
-      // Remove the first row (headers)
-      csvData.shift();
-      
+    // Remove the first row (headers)
+    csvData.shift();
+
     const data = csvData.map(row => {
       const rowData = row.split(',');
       const item = {
         file_name: rowData[0],
-        predictions: rowData.slice(1, -2).join(',').replace(/^"(.*)"$/, '$1'), // Joining predictions separated by commas and remove qoute around it.
+        predictions: rowData.slice(1, -2).join(',').replace(/^"(.*)"$/, '$1'), // Joining predictions separated by commas and remove quote around it.
         score: Number(rowData[rowData.length - 2]), // Taking the second last element as score
         'index number': rowData[rowData.length - 1].trim(), // Trimming whitespace
       };
       return item;
     });
-console.log(data)
+
+    console.log(data);
     return data;
   } catch (error) {
     console.log(error);
@@ -62,14 +85,17 @@ console.log(data)
 };
 
 
-export const getMetadata = async (name_of_file?: string): Promise<MetadataType | null> => {
+export const getMetadata = async ({
+  userId,
+  name_of_file,
+}: ReadCSVFileProps): Promise<MetadataType | null> => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
     }
 
     // Read metadata CSV file
-    const metadataResult = await readTextFile(`VisioMark\\result\\metadata.csv`, {
+    const metadataResult = await readTextFile(`VisioMark\\${userId}\\result\\metadata.csv`, {
       dir: BaseDirectory.Document,
     });
 
@@ -149,15 +175,15 @@ export const getMetadata = async (name_of_file?: string): Promise<MetadataType |
 
 
 
-const deleteImageDir = async (name_of_file: string | undefined) => {
+const deleteImageDir = async ({ userId, name_of_file }: ReadCSVFileProps) => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
     }
 
-    const metadata = await getMetadata(name_of_file);
+    const metadata = await getMetadata({ userId, name_of_file });
     if (metadata && metadata.image_dir) {
-      const imageDirPath = `VisioMark\\exam_sheets\\${metadata.image_dir}`;
+      const imageDirPath = `VisioMark\\${userId}\\exam_sheets\\${metadata.image_dir}`;
 
       try {
         // Read directory contents
@@ -188,22 +214,23 @@ const deleteImageDir = async (name_of_file: string | undefined) => {
   }
 };
 
-export const deleteCSVFile = async (name_of_file: string | undefined) => {
+export const deleteCSVFile = async ({ userId, name_of_file }: ReadCSVFileProps) => {
   try {
     if (!name_of_file) {
       throw new Error('File name is required');
     }
+    
 
     // Delete CSV file
-    await removeFile(`VisioMark\\result\\${name_of_file}`, {
+    await removeFile(`VisioMark\\${userId}\\result\\${name_of_file}`, {
       dir: BaseDirectory.Document,
     });
 
     // Delete Image_dir
-    await deleteImageDir(name_of_file);
+    await deleteImageDir({ userId, name_of_file });
 
     // Read metadata file
-    const metadataFilePath = `VisioMark\\result\\metadata.csv`;
+    const metadataFilePath = `VisioMark\\${userId}\\result\\metadata.csv`;
     const metadataContent = await readTextFile(metadataFilePath, {
       dir: BaseDirectory.Document,
     });

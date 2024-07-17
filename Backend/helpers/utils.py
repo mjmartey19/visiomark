@@ -70,14 +70,20 @@ def mark_predictions(prediction: Dict[int, str], master_key: Dict[str, Dict[str,
                 total_score -= int(value['incorrect'])
     return total_score
 
-def save_response_to_csv(response_data, course_code, department_code, new_image_dir, marking_scheme):
+def save_response_to_csv(response_data, course_code, department_code, new_image_dir, marking_scheme, user_id):
     academic_year = set_current_academic_year()
     createdAt = get_current_datetime()
     predictions_csv_file_name = f"{course_code}_{department_code}.csv"
-    predictions_csv_file_path = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", "result", predictions_csv_file_name)
 
- # Extract the keys for the CSV header
+    result_dir = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", user_id, "result")
+    # Create the directory if it doesn't exist
+    os.makedirs(result_dir, exist_ok=True)
+    
+    predictions_csv_file_path = os.path.join(result_dir, predictions_csv_file_name)
+
+    # Extract the keys for the CSV header
     predictions_header = ['file_name', 'predictions', 'score', 'index_number']
+
 
   # Write the response data to the predictions CSV file
     with open(predictions_csv_file_path, 'w', newline='') as predictions_csv_file:
@@ -95,7 +101,7 @@ def save_response_to_csv(response_data, course_code, department_code, new_image_
 
     # Create a separate CSV file for metadata
     metadata_file_name = f"metadata.csv"
-    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", "result", metadata_file_name)
+    metadata_file_path = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", user_id, "result", metadata_file_name)
 
     metadata_header = ['file_name', 'academic_year', 'course_code', 'department_code', 'createdAt', 'image_dir', 'marking_scheme']
 

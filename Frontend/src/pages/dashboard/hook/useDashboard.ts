@@ -5,26 +5,23 @@ import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appContext } from '../../../utils/Context';
 import { ITableDataProps } from '../../common/Table/types';
-import { THEME } from '../../../appTheme';
 import { schema } from '../schema';
 import { z } from 'zod';
 import { dialog } from '@tauri-apps/api';
 import { getFilenamesFromLocalStorage, storeToLocalStorage } from '../../../utils/helper';
 import { IAllData } from '../types';
-import { rem } from '@mantine/core';
-import { FiCheck } from 'react-icons/fi';
 
 const useDashboard = () => {
   // State management
   const [all, setAll] = useState<IAllData>({});
   const [error, setError] = useState<boolean>(false);
   const [selectedFolder, setSelectedFolder] = useState<string | string[]>('');
-  const [exceptionCount, setExceptionCount] = useState<number>(0)
+  const [exceptionCount, setExceptionCount] = useState<number>(0);
   // Convert selected folder path to a consistent format
   const folderPath = selectedFolder.toString().replace(/\\/g, '/');
   
   // Context state management
-  const { setResponseData, setForPreview } = useContext(appContext);
+  const { setResponseData, setForPreview, userDetails } = useContext(appContext);
 
   // Handle folder selection
   const handleFolderSelect = async () => {
@@ -36,21 +33,27 @@ const useDashboard = () => {
 
     if (result) {
       setSelectedFolder(result);
-      // console.log(result)
     }
-
   };
 
-  console.log(all)
+  console.log(all);
+
   // Mutation using react-query
   const mutate = useMutation({
     mutationFn: async (data: { [key: string]: string }) => {
       try {
+        // Create headers object conditionally
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (userDetails?.id) {
+          headers['User-ID'] = userDetails.id;
+        }
+
         const response = await fetch(`${Constants.API_URL}`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify({
             image_dir: folderPath,
             no_of_questions: data['number_of_questions'],
@@ -76,7 +79,7 @@ const useDashboard = () => {
             message: 'Marked Successfully!! 😁',
           });
 
-          // window.location.reload();
+          window.location.reload();
         }
 
         return responseData;
@@ -115,4 +118,3 @@ const useDashboard = () => {
 };
 
 export default useDashboard;
-

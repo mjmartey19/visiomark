@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { THEME } from '../../appTheme';
 import SharedCard from '../common/components/Card/card';
 import Layout from '../common/components/Layout';
@@ -10,34 +10,43 @@ import { readDir, BaseDirectory, FileEntry } from '@tauri-apps/api/fs';
 import { ScrollArea, Text } from '@mantine/core';
 import useDashboard from './hook/useDashboard';
 import ensureDirectoriesExist from '../../utils/helper'; // Import the utility function
+import { appContext } from '../../utils/Context';
 
 // Define the type for file entries
 interface FileEntryWithOptionalName extends FileEntry {
   name?: string;
 }
 
-const fetchEntries = async (): Promise<FileEntryWithOptionalName[]> => {
-  const entries = await readDir('visioMark\\result', {
+export const fetchEntries = async (userId: string): Promise<FileEntryWithOptionalName[]> => {
+  // Construct the user-specific path
+  const userResultPath = `VisioMark/${userId}/Result`;
+
+  // Read the directory contents
+  const entries = await readDir(userResultPath, {
     dir: BaseDirectory.Document,
     recursive: true,
   });
+
   return entries;
 };
 
 const Dashboard: React.FC = () => {
+  const { userDetails } = useContext(appContext);
   const { getFilenamesFromLocalStorage } = useDashboard();
   const [opened, { open, close }] = useDisclosure(false);
   const [entries, setEntries] = useState<FileEntryWithOptionalName[]>([]);
 
   useEffect(() => {
     const initializeDirectoriesAndFetchEntries = async () => {
-      await ensureDirectoriesExist(); // Ensure directories exist on component mount
-      const fetchedEntries = await fetchEntries(); // Fetch entries after ensuring directories exist
-      setEntries(fetchedEntries);
+      await ensureDirectoriesExist(userDetails?.id); // Ensure directories exist on component mount
+      if (userDetails?.id) {
+        const fetchedEntries = await fetchEntries(userDetails.id); // Fetch entries after ensuring directories exist
+        setEntries(fetchedEntries);
+      }
     };
 
     initializeDirectoriesAndFetchEntries();
-  }, []);
+  }, [userDetails]);
 
   const recentFiles = getFilenamesFromLocalStorage();
 
