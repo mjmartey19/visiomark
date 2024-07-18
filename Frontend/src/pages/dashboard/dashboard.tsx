@@ -11,6 +11,7 @@ import { ScrollArea, Text } from '@mantine/core';
 import useDashboard from './hook/useDashboard';
 import ensureDirectoriesExist from '../../utils/helper'; // Import the utility function
 import { appContext } from '../../utils/Context';
+import introJs from 'intro.js'
 
 // Define the type for file entries
 interface FileEntryWithOptionalName extends FileEntry {
@@ -44,6 +45,8 @@ const Dashboard: React.FC = () => {
         setEntries(fetchedEntries);
       }
     };
+
+
 
     initializeDirectoriesAndFetchEntries();
   }, [userDetails]);
@@ -100,6 +103,7 @@ const Dashboard: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
             }}
+            
           >
             <img src="/src/assets/home.svg" alt="logo" />
             <div
@@ -112,6 +116,7 @@ const Dashboard: React.FC = () => {
                 justifyContent: 'center',
                 paddingBottom: '2rem',
               }}
+             
             >
               <Text
                 c="#fff"
@@ -134,7 +139,7 @@ const Dashboard: React.FC = () => {
               </Text>
             </div>
 
-            <RequestBtn>
+            <RequestBtn  className='introjs-1'>
             <Modalforms open={opened} close={close} />
               <GenericBtn
                 type="button"
@@ -151,6 +156,7 @@ const Dashboard: React.FC = () => {
                   },
                 }}
                 onClick={open}
+                
               />
             </RequestBtn>
           </div>

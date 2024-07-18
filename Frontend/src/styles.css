@@ -24,3 +24,37 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+
+.introjs-tooltip {
+  background-color: #fff !important; /* Dark background for better contrast */
+  color: #121212 !important;  
+}
+
+.introjs-tooltiptitle {
+  color: #fff !important;           /* White title text */
+  white-space: nowrap !important;   /* Prevent line break */
+  overflow: hidden;                 /* Hide overflow */
+  text-overflow: ellipsis;          /* White title text */
+}
+
+.introjs-arrow {
+  border-top-color: #fff !important; /* Match tooltip background */
+  border-bottom-color: #fff !important; /* Match tooltip background */
+}
+
+.introjs-tooltiptext {
+  color: #121212 !important;           /* White text */
+}
+
+.introjs-bullets li a,
+.introjs-helperNumberLayer {
+  background: #CCCCCC !important;      /* Dark background for bullets */
+  color: #fff !important;           /* White text for bullets */
+}
+
+
+.introjs-nextbutton {
+  background-color: #000 !important; /* Customize button background */
+  color: #fff !important;   
+  border-color: 'transparent'!important         /* White text for buttons */
+}

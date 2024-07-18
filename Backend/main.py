@@ -1,6 +1,12 @@
 import os
 from fastapi import FastAPI, HTTPException, status, Request
 import pydantic
+from pydantic import BaseModel, EmailStr
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from email.mime.text import MIMEText
+import base64
 from helpers.__pred_methods__ import multiprocessing_predictions, serial_predictions
 from helpers.dir_module import image_dir_to_array
 import tensorflow as tf
@@ -32,6 +38,53 @@ class ImageProcessingModel(pydantic.BaseModel):
     course_code: str
     department_code: str
     master_key: dict = {}
+
+class SendEmailModel(BaseModel):
+    access_token: str
+    receiver_email: EmailStr
+    sender_email: EmailStr
+    csv_path: str
+
+def create_message(sender: str, to: str, subject: str, message_text: str) -> dict:
+    message = MIMEText(message_text)
+    message['to'] = to
+    message['from'] = sender
+    message['subject'] = subject
+    raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    return {'raw': raw}
+
+@app.post("/send-email")
+async def send_email(model: SendEmailModel):
+    access_token = model.access_token
+    sender_email = model.sender_email
+    receiver_email = model.receiver_email
+    csv_path = model.csv_path
+
+    print(access_token, receiver_email, send_email, csv_path)
+
+    if not os.path.isfile(csv_path):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="CSV file not found")
+       
+
+    try:
+        creds = Credentials(token=access_token)
+        if creds.expired:
+            # Refresh the credentials if they are expired
+            creds.refresh(Request())
+        service = build('gmail', 'v1', credentials=creds)
+
+        subject = "CSV File"
+        body = "Please find the CSV file attached."
+
+        message = create_message(sender_email, receiver_email, subject, body)
+
+        send_message = service.users().messages().send(userId="me", body=message).execute()
+        print(f'Message Id: {send_message["id"]}')
+        return {"message": "Email sent successfully"}
+    except HttpError as error:
+        print(f'An error occurred: {error}')
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(error))
+
 
 def copy_images_to_visioMark(image_dir: str, course_code: str, user_id: str):
     exam_sheets_dir = os.path.join(os.path.expanduser("~"), "Documents", "VisioMark", user_id, "exam_sheets")

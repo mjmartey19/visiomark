@@ -12,6 +12,7 @@ type UserDetails = {
   name: string;
   email: string;
   picture: string;
+  access_token: string;
 } | null;
 
 export function usePersistentState<T>(key: string, initialState: T) {

@@ -28,7 +28,8 @@ const BrowserSignup = () => {
             id: data.sub,
             name: data.name,
             email: data.email,
-            picture: data.picture
+            picture: data.picture,
+            access_token: codeResponse['access_token']
           });
           navigate('/home');
         });

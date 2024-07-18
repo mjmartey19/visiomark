@@ -34,6 +34,8 @@ import NotificationModal from '../notification/notification';
 import { appContext } from '../../../utils/Context';
 import { useContext, useEffect, useRef, useState } from 'react';
 import UserAvatar from './UserAvator';
+import introJs from 'intro.js'
+import 'intro.js/introjs.css';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { tabValue } = useParams();
@@ -50,6 +52,62 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     link.download = 'MarkingSchemeTemplate.xlsx';
     link.click();
   };
+  useEffect(() => {
+    const startTour = () => {
+      const introElement1 = document.querySelector('.introjs-1') as HTMLElement | null;
+      const introElement2 = document.querySelector('.introjs-2') as HTMLElement | null;
+      const introElement3 = document.querySelector('.introjs-3') as HTMLElement | null;
+      const introElement4 = document.querySelector('.introjs-4') as HTMLElement | null;
+  
+      if (introElement1 && introElement2 && introElement3 && introElement4) {
+        const tour = introJs();
+        tour.setOptions({
+          steps: [
+            {
+              title: 'Explore VisioMark',
+              intro: `Hi, ${userDetails?.name}. We are thrilled to have you on board.`,
+            },
+            {
+              title: 'Mark Sheets',
+              element: introElement1, // Ensure this selector matches the element
+              intro: 'Begin the marking process by entering the Course course, Department Code, Academic Year,Total number of Questions and Uploading the folder containing scannable sheets. You can either upload a marking scheme in Excel format or select keys to mark the sheets.',
+            },
+            {
+              title: 'Template',
+              element: introElement2, 
+              intro: 'Download the Marking Scheme Template to simplify the marking process. Upload this template instead of manually selecting keys during the marking process for a streamlined experience.',
+            },
+            {
+              title: 'All Files',
+              element: introElement3, // Ensure this selector matches the element
+              intro: 'Access a comprehensive list of all marked results. This section provides easy retrieval and review of previously marked sheets.',
+            },
+            {
+              title: 'Settings',
+              element: introElement4, // Ensure this selector matches the element
+              intro: 'Configure settings to assign marks uniformly across all questions for consistent grading.',
+            }
+          ],
+          
+        });
+
+        // Start the tour
+        tour.start();
+
+        // Save the tour shown status to local storage
+        localStorage.setItem('tourShown', 'true');
+      } else {
+        setTimeout(startTour, 500); // Retry after 500ms if the element is not found
+      }
+    };
+
+    // Check if the tour has been shown before
+    const tourShown = localStorage.getItem('tourShown');
+
+    if (!tourShown && userDetails) {
+      setTimeout(startTour, 500);
+    }
+  }, [userDetails]);
 
   useEffect(() => {
     // Fetch exception count from localStorage when component mounts
@@ -58,6 +116,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       setExceptionCount(parseInt(storedExceptionCount, 10));
     }
   }, []);
+
 
   const logout = () => {
     setUserDetails(null);  // Clear user details from context
@@ -128,11 +187,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             />
           </RequestBtn>
           
-
+          <div className='introjs-2'>
           <GenericBtn
             tooltip="Download MarkingScheme Template"
             type="button"
-            title="Download Template"
+            title="Marking Scheme Template"
             sx={{
               fontSize: '0.8rem',
               borderRadius: '20px',
@@ -143,8 +202,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 background: THEME.colors.background.primary,
               },
             }}
-            onClick={downloadTemplate}
+            onClick={downloadTemplate}  
           />
+          </div>
 
         </div>
       </TopbarContainer>
@@ -164,6 +224,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <NavLinks
               to={`${Constants.PATHS.allfiles}`}
               aria-label="shows all the files"
+              className='introjs-3'
             >
               <CgFileDocument size={20} />
               All files
@@ -191,6 +252,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <NavLinks
               to={`${Constants.PATHS.settings}`}
               aria-label="settings of the user"
+              className='introjs-4'
             >
               <FiSettings size={20} />
               Settings

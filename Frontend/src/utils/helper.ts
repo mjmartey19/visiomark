@@ -214,6 +214,7 @@ const deleteImageDir = async ({ userId, name_of_file }: ReadCSVFileProps) => {
   }
 };
 
+
 export const deleteCSVFile = async ({ userId, name_of_file }: ReadCSVFileProps) => {
   try {
     if (!name_of_file) {

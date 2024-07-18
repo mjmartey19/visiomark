@@ -16,6 +16,7 @@ import ModalComp from '../../Modal/Modal';
 import { useDisclosure } from '@mantine/hooks';
 import GenericBtn from '../button';
 import { sx } from '../layoutStyles';
+import axios from 'axios';
 
 const SharedCardMenu = ({
   name_of_file,
@@ -30,11 +31,10 @@ const SharedCardMenu = ({
   const openFile = async (path: string) => {
     await openShell(path);
   };
-  const { setResponseData } = useContext(appContext);
+  const { setResponseData, userDetails } = useContext(appContext);
   const [shareOpened, { open: openShare, close: closeShare }] = useDisclosure(false); 
   const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const [email, setEmail] = useState("");
-  const { userDetails } = useContext(appContext);
 
   const runReadCSVFile = async (userId: string | undefined, name_of_file: string | undefined) => {
     const data = await readCSVFile({ userId, name_of_file });
@@ -44,11 +44,26 @@ const SharedCardMenu = ({
   };
 
   const sendCSVByEmail = async () => {
-    // Implement the logic to send the CSV file to  provided email
-    console.log("Email:", email);
-    closeShare();
-    openShare();
+   
+    console.log(entry.path);
+    try {
+      const response = await axios.post('http://localhost:8000/send-email', {
+        access_token: userDetails?.access_token,
+        sender_email: userDetails?.email,
+        receiver_email: email,
+        csv_path: entry.path
+      }, {
+        headers: {
+          'Content-Type': 'application/json' // Ensure Content-Type header is set
+        }
+      });
+      console.log("Email sent successfully:", response.data);
+      closeShare();
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
   };
+  
 
   return (
     <div
