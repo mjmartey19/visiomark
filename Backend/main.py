@@ -1,12 +1,11 @@
 import os
 from fastapi import FastAPI, HTTPException, status, Request
-import pydantic
 from pydantic import BaseModel, EmailStr
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from email.mime.text import MIMEText
-import base64
+from flask import Flask
+from flask_mail import Mail, Message
 from helpers.__pred_methods__ import multiprocessing_predictions, serial_predictions
 from helpers.dir_module import image_dir_to_array
 import tensorflow as tf
@@ -19,9 +18,28 @@ import datetime
 import requests
 import json
 import csv
+from openpyxl import Workbook
+from dotenv import load_dotenv
 
+load_dotenv() 
+
+# Create FastAPI instance
 app = FastAPI()
 
+# Create Flask instance for mailing
+flask_app = Flask(__name__)
+
+# Configuration of mail
+flask_app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+flask_app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+flask_app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+flask_app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+flask_app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+flask_app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL') == 'True'
+
+mail = Mail(flask_app)
+
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,58 +50,69 @@ app.add_middleware(
 # Configure the root logger
 logging.basicConfig(level=logging.INFO)  # Set the desired log level
 
-class ImageProcessingModel(pydantic.BaseModel):
+class ImageProcessingModel(BaseModel):
     image_dir: str
-    no_of_questions: str = '40',
+    no_of_questions: str = '40'
     course_code: str
     department_code: str
     master_key: dict = {}
 
 class SendEmailModel(BaseModel):
-    access_token: str
     receiver_email: EmailStr
     sender_email: EmailStr
     csv_path: str
 
-def create_message(sender: str, to: str, subject: str, message_text: str) -> dict:
-    message = MIMEText(message_text)
-    message['to'] = to
-    message['from'] = sender
-    message['subject'] = subject
-    raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
-    return {'raw': raw}
+import pandas as pd
+
+def convert_csv_to_xlsx(csv_path: str) -> str:
+    # Read the CSV file using pandas
+    df = pd.read_csv(csv_path)
+    
+    # Define the XLSX file path
+    xlsx_path = csv_path.replace('.csv', '.xlsx')
+    
+    # Save the DataFrame to an XLSX file
+    df.to_excel(xlsx_path, index=False)
+    
+    return xlsx_path
+
+
 
 @app.post("/send-email")
 async def send_email(model: SendEmailModel):
-    access_token = model.access_token
-    sender_email = model.sender_email
-    receiver_email = model.receiver_email
-    csv_path = model.csv_path
+    with flask_app.app_context():
+        msg = Message(
+            subject=f"""Your Requested File: {model.csv_path}""",
+            sender=model.sender_email,
+            recipients=[model.receiver_email]
+        )
+        
+        # Email body content
+        msg.body = f"""
+        Hello,
 
-    print(access_token, receiver_email, send_email, csv_path)
+        Please find attached the result file you requested.
 
-    if not os.path.isfile(csv_path):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="CSV file not found")
-       
+    
+        If you have any questions or need further assistance, feel free to reply to this email.
 
-    try:
-        creds = Credentials(token=access_token)
-        if creds.expired:
-            # Refresh the credentials if they are expired
-            creds.refresh(Request())
-        service = build('gmail', 'v1', credentials=creds)
+        Best regards,
+        Visiomark Team
+        """
 
-        subject = "CSV File"
-        body = "Please find the CSV file attached."
+        # Attaching the file
+        with open(model.csv_path, 'rb') as fp:
+            file_name = os.path.basename(convert_csv_to_xlsx(model.csv_path))
+            msg.attach(file_name, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fp.read())
 
-        message = create_message(sender_email, receiver_email, subject, body)
+        # try:
+        mail.send(msg)
+            # return {"message": "Email sent successfully"}
+        # except Exception as e:
+            # logging.error(f"Failed to send email: {str(e)}")
+            # raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send email")
 
-        send_message = service.users().messages().send(userId="me", body=message).execute()
-        print(f'Message Id: {send_message["id"]}')
-        return {"message": "Email sent successfully"}
-    except HttpError as error:
-        print(f'An error occurred: {error}')
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(error))
+
 
 
 def copy_images_to_visioMark(image_dir: str, course_code: str, user_id: str):
@@ -139,8 +168,7 @@ async def predict_score(ipm: ImageProcessingModel, request: Request):
 
     return [csv_file, response]
 
-class UserInfoModel(pydantic.BaseModel):
-    access_token: str
+
 
 def create_user_csv(file_path, user_details):
     # Check if the file exists
@@ -161,15 +189,7 @@ def create_user_csv(file_path, user_details):
         if not file_exists:
             writer.writeheader()  # Write the header only once when file is created
         writer.writerow(user_details)
-
-# @app.post("/auth/login")
-# async def user_info(request: Request):
-#     data = await request.json()
-#     print(data)
-
-#     response = requests.get(f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={data['access_token']}")
-#     print(response.json())
-#     return response.json()
+        
 
 @app.post("/auth/login")
 async def user_info(request: Request):

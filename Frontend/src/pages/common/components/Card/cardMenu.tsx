@@ -1,4 +1,4 @@
-import { Card, Text, TextInput, Tooltip } from '@mantine/core';
+import { Card, Loader, Text, TextInput, Tooltip } from '@mantine/core';
 import { THEME } from '../../../../appTheme';
 import { FileEntry } from '@tauri-apps/api/fs';
 import { open as openShell } from '@tauri-apps/api/shell';
@@ -17,6 +17,8 @@ import { useDisclosure } from '@mantine/hooks';
 import GenericBtn from '../button';
 import { sx } from '../layoutStyles';
 import axios from 'axios';
+import AppAlert from '../../notification/alert';
+
 
 const SharedCardMenu = ({
   name_of_file,
@@ -35,6 +37,7 @@ const SharedCardMenu = ({
   const [shareOpened, { open: openShare, close: closeShare }] = useDisclosure(false); 
   const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const runReadCSVFile = async (userId: string | undefined, name_of_file: string | undefined) => {
     const data = await readCSVFile({ userId, name_of_file });
@@ -44,26 +47,36 @@ const SharedCardMenu = ({
   };
 
   const sendCSVByEmail = async () => {
-   
-    console.log(entry.path);
+    setLoading(true);
     try {
       const response = await axios.post('http://localhost:8000/send-email', {
-        access_token: userDetails?.access_token,
         sender_email: userDetails?.email,
         receiver_email: email,
         csv_path: entry.path
       }, {
         headers: {
-          'Content-Type': 'application/json' // Ensure Content-Type header is set
+          'Content-Type': 'application/json'
         }
       });
       console.log("Email sent successfully:", response.data);
-      closeShare();
+      AppAlert({
+        title: 'Success',
+        color: 'teal',
+        message: 'Email sent successfully!',
+      });
+      // closeShare();
     } catch (error) {
       console.error("Error sending email:", error);
+      AppAlert({
+        title: 'Error',
+        color: 'red',
+        message: 'Failed to send email.',
+      });
+    } finally {
+      setLoading(false);
     }
+    
   };
-  
 
   return (
     <div
@@ -139,6 +152,7 @@ const SharedCardMenu = ({
                       sx={sx}
                       style={{ width: '100%' }}
                     />
+                      {!loading ? (
                     <GenericBtn
                       title="Share"
                       type="button"
@@ -155,7 +169,13 @@ const SharedCardMenu = ({
                         },
                       }}
                     />
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                      <Loader color="#fff" size={50}/>
+                    </div>
+                  )}
                   </div>
+                              
                 </div>
               </ModalComp>
               <LuShare size={20} color="#fff"  

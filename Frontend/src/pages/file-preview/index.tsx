@@ -14,8 +14,8 @@ const Preview = () => {
     }
   }, [location.state?.name_of_file]);
 
-  console.log(fileName);
-  console.log('Preview ResponseData:', responseData)
+  // console.log(fileName);
+  // console.log('Preview ResponseData:', responseData)
   return (
     <Layout>
       <GenericTable tdata={responseData} csv_file_name={fileName} />

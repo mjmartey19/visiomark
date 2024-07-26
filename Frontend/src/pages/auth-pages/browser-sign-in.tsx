@@ -32,13 +32,7 @@ const BrowserLogin = () => {
       <MainContainer>
         <Flex justify="center" align="center" direction="column">
           <H2>Sign in to VisioMark</H2>
-          {/* <GoogleLogin
-            clientId="931309954354-hgedvklrb9c4j9fqf7rdrp1jsrpku1qp.apps.googleusercontent.com"
-            buttonText="Continue with Google"
-            onSuccess={handleGoogleLogin}
-            onFailure={handleLoginFailure}
-            cookiePolicy={'single_host_origin'}
-          /> */}
+         
           <Text style={{ paddingTop: '1rem' }}>
             No Account?{' '}
             <NavLink to={''} style={{ textDecoration: 'none', color: '#1976D2' }}>

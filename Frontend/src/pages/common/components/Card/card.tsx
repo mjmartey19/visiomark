@@ -11,6 +11,8 @@ import { appContext } from '../../../../utils/Context';
 import { readCSVFile, getMetadata, getTotalExceptions } from '../../../../utils/helper';
 import SharedCardMenu from './cardMenu';
 import { IStudentDataProps } from '../../../../utils/type';
+import introJs from 'intro.js'
+import 'intro.js/introjs.css';
 
 const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined; entry: FileEntry; }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -54,6 +56,7 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
     }
   };
 
+
   useEffect(() => {
     if (name_of_file) {
       fetchMetaData();
@@ -69,6 +72,54 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
     }
   }, [responseData]);
 
+useEffect(() => {
+    const startTour = () => {
+      const Card = document.querySelector('.file') as HTMLElement | null;
+      const Exceptions = document.querySelector('.file-exceptions') as HTMLElement | null;
+      const OpenFile = document.querySelector('.file-open') as HTMLElement | null;
+ 
+      if (Card && Exceptions) {
+        const tour = introJs()
+        tour.setOptions({
+          steps: [
+            {
+              title: 'Sheets Marked',
+              intro: `Hi, ${userDetails?.name}. Congratulations on marking your first sheets!`,
+            },
+            {
+              title: 'File',
+              element: Card, // Ensure this selector matches the element
+              intro: 'This section allows for easy review of your marked sheets.',
+            },
+            {
+              title: 'Exceptions',
+              element: Exceptions, // Ensure this selector matches the element
+              intro: 'Here you can see the total number of exceptions raised by the model.',
+            },
+          ],
+          
+        });
+
+        // Start the tour
+        tour.start();
+
+        // Save the tour shown status to local storage
+        localStorage.setItem('cardTourShown', 'true');
+      } else {
+        setTimeout(startTour, 500); // Retry after 500ms if the element is not found
+      }
+    };
+
+    // Check if the tour has been shown before
+    const tourShown = localStorage.getItem('cardTourShown');
+
+    if (!tourShown && userDetails) {
+      setTimeout(startTour, 500);
+    }
+  }, [userDetails]);
+
+
+  
   return (
     <div
       style={{
@@ -76,6 +127,7 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className='file'
     >
       <Card
         sx={{
@@ -87,6 +139,7 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
           padding: '2rem 1rem',
           width: '13rem',
         }}
+        
       >
         <div>
           <div
@@ -99,6 +152,7 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
               borderRadius: '0.2rem',
               background: THEME.colors.background.jet,
             }}
+           
           >
             <FiFileText size={20} />
           </div>
@@ -155,6 +209,7 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
                 borderRadius: '5rem',
                 paddingLeft: '0.5rem',
               }}
+              className='file-exceptions'
             >
               <Text size="sm">Exceptions</Text>
               <Text
@@ -162,7 +217,7 @@ const SharedCard = ({ name_of_file, entry }: { name_of_file: string | undefined;
                   background: THEME.colors.background.primary,
                   padding: '0.1rem 0.6rem',
                   borderRadius: '50%',
-                  color: 'red',
+                  color: '#fff',
                 }}
               >
                 {exceptionCount}

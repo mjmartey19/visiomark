@@ -60,7 +60,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       const introElement4 = document.querySelector('.introjs-4') as HTMLElement | null;
   
       if (introElement1 && introElement2 && introElement3 && introElement4) {
-        const tour = introJs();
+        const tour = introJs()
         tour.setOptions({
           steps: [
             {
@@ -75,12 +75,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             {
               title: 'Template',
               element: introElement2, 
-              intro: 'Download the Marking Scheme Template to simplify the marking process. Upload this template instead of manually selecting keys during the marking process for a streamlined experience.',
+              intro: 'Download the Marking Scheme Template to simplify the marking process. Upload this template instead of manually selecting keys during the marking process.',
             },
             {
               title: 'All Files',
               element: introElement3, // Ensure this selector matches the element
-              intro: 'Access a comprehensive list of all marked results. This section provides easy retrieval and review of previously marked sheets.',
+              intro: 'Access a comprehensive list of all marked results. This section provides easy review of previously marked sheets.',
             },
             {
               title: 'Settings',
