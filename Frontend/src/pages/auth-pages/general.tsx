@@ -10,7 +10,7 @@ const General = ({ children }: { children: React.ReactNode }) => {
     <div style={{height: '100vh', background: `${THEME.colors.background.black}`}}>
       <TopbarContainer>
         <LogoWrapper>
-          <img src="/src/assets/logo.svg" width={30} alt="logo" />
+          <img src="/src/assets/logo.png" width={30} height={30} alt="logo" />
           <Title>VisioMark</Title>
         </LogoWrapper>
       </TopbarContainer>

@@ -155,7 +155,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <Dashboardcontainer>
       <TopbarContainer>
         <LogoWrapper>
-          <img src="/src/assets/logo.svg" width={30} alt="logo" />
+          <img src="/src/assets/logo.png" width={30} alt="logo" />
           <Title>VisioMark</Title>
         </LogoWrapper>
 

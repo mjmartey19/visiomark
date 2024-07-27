@@ -87,7 +87,8 @@ export const ContentContainer = styled.div`
 
 export const LogoWrapper = styled.div`
   display: flex;
-  gap: 0.8rem;
+  align-items: center;
+  gap: 0.2rem;
   padding: 0.5rem 1rem;
 `;
 
